@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import {
   Container,
   Grid,
@@ -23,7 +24,12 @@ import {
   Divider,
   InputAdornment,
   CircularProgress,
-  Skeleton
+  Skeleton,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Avatar
 } from '@mui/material';
 import {
   Description as FileTextIcon,
@@ -37,12 +43,22 @@ import {
   AttachMoney as DollarSignIcon,
   Event as CalendarIcon,
   Chat as MessageSquareIcon,
-  ArrowBack as ArrowBackIcon
+  ArrowBack as ArrowBackIcon,
+  Scale as ScaleIcon,
+  Business as BuildingIcon,
+  Message as MessageIcon,
+  Dashboard as DashboardIcon,
+  Contacts as ContactsIcon,
+  Folder as DocumentsIcon,
+  Group as ConsultationsIcon,
+  Settings as SettingsIcon,
+  Logout as LogoutIcon
 } from '@mui/icons-material';
 import { contractService } from '../lib/api';
 
 export function ContractGenerationPage() {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [formData, setFormData] = useState({});
@@ -52,20 +68,19 @@ export function ContractGenerationPage() {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
+    const loadTemplates = async () => {
+      try {
+        const response = await contractService.getTemplates();
+        setTemplates(response);
+      } catch (error) {
+        console.error('Error loading templates:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadTemplates();
   }, []);
-
-  const loadTemplates = async () => {
-    try {
-      setLoading(true);
-      const response = await contractService.getContractTemplates();
-      setTemplates(response.templates);
-    } catch (error) {
-      console.error('Error loading templates:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleTemplateSelect = (template) => {
     setSelectedTemplate(template);
@@ -80,7 +95,7 @@ export function ContractGenerationPage() {
       [fieldName]: value
     }));
     
-    // Clear error for this field
+    // Clear error when user starts typing
     if (errors[fieldName]) {
       setErrors(prev => ({
         ...prev,
@@ -92,12 +107,7 @@ export function ContractGenerationPage() {
   const validateForm = () => {
     const newErrors = {};
     
-    if (!selectedTemplate) {
-      newErrors.template = 'Please select a contract template';
-      return newErrors;
-    }
-
-    selectedTemplate.fields.forEach(field => {
+    selectedTemplate?.fields?.forEach(field => {
       if (field.required && !formData[field.name]) {
         newErrors[field.name] = `${field.label} is required`;
       }
@@ -152,22 +162,17 @@ export function ContractGenerationPage() {
             key={field.name}
             fullWidth
             label={field.label}
-            type="number"
             value={value}
             onChange={(e) => handleInputChange(field.name, e.target.value)}
             error={!!hasError}
             helperText={hasError}
             required={field.required}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <DollarSignIcon />
-                </InputAdornment>
-              ),
-            }}
-            placeholder="0.00"
+            placeholder="0"
             variant="outlined"
             sx={{ mb: 2 }}
+            InputProps={{
+              startAdornment: <InputAdornment position="start">$</InputAdornment>,
+            }}
           />
         );
 
@@ -183,30 +188,36 @@ export function ContractGenerationPage() {
             error={!!hasError}
             helperText={hasError}
             required={field.required}
+            variant="outlined"
+            sx={{ mb: 2 }}
             InputLabelProps={{
               shrink: true,
             }}
-            variant="outlined"
-            sx={{ mb: 2 }}
           />
         );
 
-      case 'number':
+      case 'select':
         return (
-          <TextField
-            key={field.name}
-            fullWidth
-            label={field.label}
-            type="number"
-            value={value}
-            onChange={(e) => handleInputChange(field.name, e.target.value)}
-            error={!!hasError}
-            helperText={hasError}
-            required={field.required}
-            placeholder="0"
-            variant="outlined"
-            sx={{ mb: 2 }}
-          />
+          <FormControl key={field.name} fullWidth sx={{ mb: 2 }} error={!!hasError}>
+            <InputLabel>{field.label}</InputLabel>
+            <Select
+              value={value}
+              label={field.label}
+              onChange={(e) => handleInputChange(field.name, e.target.value)}
+              required={field.required}
+            >
+              {field.options?.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+            {hasError && (
+              <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 2 }}>
+                {hasError}
+              </Typography>
+            )}
+          </FormControl>
         );
 
       default:
@@ -230,258 +241,358 @@ export function ContractGenerationPage() {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box sx={{ mb: 4 }}>
+      <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'grey.50' }}>
+        {/* Sidebar Skeleton */}
+        <Box sx={{ width: 280, bgcolor: 'primary.dark' }}>
+          <Skeleton variant="rectangular" height="100%" />
+        </Box>
+        
+        {/* Main Content Skeleton */}
+        <Box sx={{ flex: 1, p: 4 }}>
           <Skeleton variant="text" width="40%" height={40} />
           <Skeleton variant="text" width="60%" height={24} />
+          <Grid container spacing={3} sx={{ mt: 2 }}>
+            <Grid item xs={12} lg={8}>
+              <Skeleton variant="rectangular" height={300} />
+            </Grid>
+            <Grid item xs={12} lg={4}>
+              <Skeleton variant="rectangular" height={200} />
+            </Grid>
+          </Grid>
         </Box>
-        <Grid container spacing={3}>
-          <Grid item xs={12} lg={8}>
-            <Skeleton variant="rectangular" height={300} />
-          </Grid>
-          <Grid item xs={12} lg={4}>
-            <Skeleton variant="rectangular" height={200} />
-          </Grid>
-        </Grid>
-      </Container>
+      </Box>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Header */}
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <Box>
-          <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
-            Contract Generation
-          </Typography>
-          <Typography variant="h6" color="text.secondary">
-            AI-powered contract creation with legal review
-          </Typography>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'grey.50' }}>
+      {/* Sidebar */}
+      <Box sx={{ width: 280, bgcolor: 'primary.dark', color: 'white', display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <ScaleIcon sx={{ fontSize: 32 }} />
+            <Typography variant="h5" fontWeight="bold">
+              Agent Free
+            </Typography>
+          </Box>
         </Box>
-        <Button 
-          variant="outlined" 
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/dashboard')}
-        >
-          Back to Dashboard
-        </Button>
+
+        <Box sx={{ flex: 1, px: 2 }}>
+          <List>
+            <ListItem button component={Link} to="/dashboard" sx={{ borderRadius: 2, mb: 1 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                <HomeIcon />
+              </ListItemIcon>
+              <ListItemText primary="Dashboard" />
+            </ListItem>
+            <ListItem button component={Link} to="/properties" sx={{ borderRadius: 2, mb: 1 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                <BuildingIcon />
+              </ListItemIcon>
+              <ListItemText primary="My Transactions" />
+            </ListItem>
+            <ListItem 
+              button 
+              sx={{ 
+                borderRadius: 2, 
+                mb: 1, 
+                bgcolor: 'primary.main',
+                '&:hover': { bgcolor: 'primary.light' }
+              }}
+            >
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                <FileTextIcon />
+              </ListItemIcon>
+              <ListItemText primary="Contracts" />
+            </ListItem>
+            <ListItem button component={Link} to="/documents" sx={{ borderRadius: 2, mb: 1 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                <DocumentsIcon />
+              </ListItemIcon>
+              <ListItemText primary="Documents" />
+            </ListItem>
+            <ListItem button component={Link} to="/messages" sx={{ borderRadius: 2, mb: 1 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                <MessageIcon />
+              </ListItemIcon>
+              <ListItemText primary="Messages" />
+            </ListItem>
+            <ListItem button component={Link} to="/attorney-dashboard" sx={{ borderRadius: 2, mb: 1 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                <DashboardIcon />
+              </ListItemIcon>
+              <ListItemText primary="Attorney Dashboard" />
+            </ListItem>
+            <ListItem button component={Link} to="/attorney-clients" sx={{ borderRadius: 2, mb: 1 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                <ContactsIcon />
+              </ListItemIcon>
+              <ListItemText primary="Client Management" />
+            </ListItem>
+            <ListItem button component={Link} to="/attorney-calendar" sx={{ borderRadius: 2, mb: 1 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                <CalendarIcon />
+              </ListItemIcon>
+              <ListItemText primary="Calendar" />
+            </ListItem>
+            <ListItem button component={Link} to="/attorney-workflow" sx={{ borderRadius: 2, mb: 1 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                <ConsultationsIcon />
+              </ListItemIcon>
+              <ListItemText primary="Agent Workflow" />
+            </ListItem>
+            <ListItem button component={Link} to="/settings" sx={{ borderRadius: 2, mb: 1 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                <SettingsIcon />
+              </ListItemIcon>
+              <ListItemText primary="Settings" />
+            </ListItem>
+          </List>
+        </Box>
+
+        <Box sx={{ p: 2, borderTop: 1, borderColor: 'primary.light' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+            <Avatar sx={{ bgcolor: 'primary.main' }}>
+              {user?.name?.charAt(0) || 'U'}
+            </Avatar>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant="body2" fontWeight="medium" noWrap>
+                {user?.name || 'User'}
+              </Typography>
+              <Typography variant="caption" color="primary.light" noWrap>
+                {user?.email || 'user@agentfree.com'}
+              </Typography>
+            </Box>
+          </Box>
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            startIcon={<LogoutIcon />}
+            onClick={signOut}
+            sx={{ bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.light' } }}
+          >
+            Sign Out
+          </Button>
+        </Box>
       </Box>
 
-      <Grid container spacing={3}>
-        {/* Main Content */}
-        <Grid item xs={12} lg={8}>
-          {/* Template Selection */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <FileTextIcon sx={{ mr: 1 }} />
-                <Typography variant="h6" component="h2">
-                  Select Contract Template
-                </Typography>
-              </Box>
-              
-              <Grid container spacing={2}>
-                {templates.map((template) => (
-                  <Grid item xs={12} md={6} key={template.id}>
-                    <Card 
-                      sx={{ 
-                        cursor: 'pointer',
-                        border: selectedTemplate?.id === template.id ? 2 : 1,
-                        borderColor: selectedTemplate?.id === template.id ? 'primary.main' : 'divider',
-                        bgcolor: selectedTemplate?.id === template.id ? 'primary.50' : 'background.paper',
-                        '&:hover': {
-                          bgcolor: selectedTemplate?.id === template.id ? 'primary.50' : 'grey.50'
-                        }
-                      }}
-                      onClick={() => handleTemplateSelect(template)}
-                    >
-                      <CardContent>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <Box>
-                            <Typography variant="h6" gutterBottom>
-                              {template.name}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                              {template.description}
-                            </Typography>
-                            <Chip 
-                              label={template.type} 
-                              size="small" 
-                              color="secondary"
-                            />
-                          </Box>
-                          {selectedTemplate?.id === template.id && (
-                            <CheckCircleIcon color="primary" />
-                          )}
-                        </Box>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            </CardContent>
-          </Card>
+      {/* Main Content */}
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <Container maxWidth="lg" sx={{ py: 4, flex: 1 }}>
+          {/* Header */}
+          <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <Box>
+              <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
+                Contract Generation
+              </Typography>
+              <Typography variant="h6" color="text.secondary">
+                AI-powered contract creation with legal review
+              </Typography>
+            </Box>
+            <Button 
+              variant="outlined" 
+              startIcon={<ArrowBackIcon />}
+              onClick={() => navigate('/dashboard')}
+            >
+              Back to Dashboard
+            </Button>
+          </Box>
 
-          {/* Contract Form */}
-          {selectedTemplate && (
-            <Card sx={{ mb: 3 }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <UserIcon sx={{ mr: 1 }} />
-                  <Typography variant="h6" component="h2">
-                    Contract Details
-                  </Typography>
-                </Box>
-
-                <Grid container spacing={2}>
-                  {selectedTemplate.fields.map((field, index) => (
-                    <Grid item xs={12} md={6} key={field.name}>
-                      {renderFormField(field)}
-                    </Grid>
-                  ))}
-                </Grid>
-
-                <Divider sx={{ my: 3 }} />
-
-                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                  <Button 
-                    variant="contained"
-                    onClick={handleGenerateContract}
-                    disabled={generating}
-                    startIcon={generating ? <CircularProgress size={16} /> : <WandIcon />}
-                    size="large"
-                  >
-                    {generating ? 'Generating...' : 'Generate Contract'}
-                  </Button>
+          <Grid container spacing={3}>
+            {/* Main Content */}
+            <Grid item xs={12} lg={8}>
+              {/* Template Selection */}
+              <Card sx={{ mb: 3 }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <FileTextIcon sx={{ mr: 1 }} />
+                    <Typography variant="h6" component="h2">
+                      Select Contract Template
+                    </Typography>
+                  </Box>
                   
-                  {generatedContract && (
-                    <>
-                      <Button 
-                        variant="outlined" 
+                  <Grid container spacing={2}>
+                    {templates.map((template) => (
+                      <Grid item xs={12} md={6} key={template.id}>
+                        <Card 
+                          sx={{ 
+                            cursor: 'pointer',
+                            border: selectedTemplate?.id === template.id ? 2 : 1,
+                            borderColor: selectedTemplate?.id === template.id ? 'primary.main' : 'divider',
+                            bgcolor: selectedTemplate?.id === template.id ? 'primary.50' : 'background.paper',
+                            '&:hover': {
+                              bgcolor: selectedTemplate?.id === template.id ? 'primary.50' : 'grey.50'
+                            }
+                          }}
+                          onClick={() => handleTemplateSelect(template)}
+                        >
+                          <CardContent>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                              <Box>
+                                <Typography variant="h6" component="h3" gutterBottom>
+                                  {template.name}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                  {template.description}
+                                </Typography>
+                                <Chip 
+                                  label={template.category} 
+                                  color="success" 
+                                  size="small"
+                                />
+                              </Box>
+                              {selectedTemplate?.id === template.id && (
+                                <CheckCircleIcon color="primary" />
+                              )}
+                            </Box>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </CardContent>
+              </Card>
+
+              {/* Form Fields */}
+              {selectedTemplate && (
+                <Card sx={{ mb: 3 }}>
+                  <CardContent>
+                    <Typography variant="h6" component="h2" gutterBottom>
+                      Contract Details
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                      Fill in the required information for your {selectedTemplate.name.toLowerCase()}.
+                    </Typography>
+                    
+                    <Box component="form">
+                      {selectedTemplate.fields?.map(renderFormField)}
+                      
+                      <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+                        <Button
+                          variant="contained"
+                          size="large"
+                          startIcon={generating ? <CircularProgress size={20} color="inherit" /> : <WandIcon />}
+                          onClick={handleGenerateContract}
+                          disabled={generating}
+                          sx={{ minWidth: 200 }}
+                        >
+                          {generating ? 'Generating...' : 'Generate Contract'}
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="large"
+                          onClick={() => {
+                            setSelectedTemplate(null);
+                            setFormData({});
+                            setErrors({});
+                          }}
+                        >
+                          Reset
+                        </Button>
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Generated Contract Preview */}
+              {generatedContract && (
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" component="h2" gutterBottom>
+                      Generated Contract Preview
+                    </Typography>
+                    <Paper 
+                      sx={{ 
+                        p: 3, 
+                        mb: 3, 
+                        bgcolor: 'grey.50',
+                        maxHeight: 400,
+                        overflow: 'auto'
+                      }}
+                    >
+                      <Typography variant="body2" component="pre" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {generatedContract.content}
+                      </Typography>
+                    </Paper>
+                    
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <Button
+                        variant="contained"
                         startIcon={<DownloadIcon />}
-                        size="large"
+                        onClick={() => {
+                          // Download logic here
+                          console.log('Downloading contract...');
+                        }}
                       >
                         Download PDF
                       </Button>
-                      <Button 
-                        variant="outlined" 
+                      <Button
+                        variant="outlined"
                         startIcon={<SendIcon />}
-                        size="large"
+                        onClick={() => {
+                          // Send for review logic here
+                          console.log('Sending for attorney review...');
+                        }}
                       >
                         Send for Review
                       </Button>
-                    </>
-                  )}
-                </Box>
-              </CardContent>
-            </Card>
-          )}
+                    </Box>
+                  </CardContent>
+                </Card>
+              )}
+            </Grid>
 
-          {/* Generated Contract Preview */}
-          {generatedContract && (
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <CheckCircleIcon sx={{ mr: 1, color: 'success.main' }} />
-                  <Typography variant="h6" component="h2">
-                    Generated Contract
+            {/* Sidebar */}
+            <Grid item xs={12} lg={4}>
+              {/* Progress Stepper */}
+              <Card sx={{ mb: 3 }}>
+                <CardContent>
+                  <Typography variant="h6" component="h2" gutterBottom>
+                    Contract Process
                   </Typography>
-                </Box>
+                  <Stepper activeStep={getActiveStep()} orientation="vertical">
+                    {steps.map((label, index) => (
+                      <Step key={label}>
+                        <StepLabel>{label}</StepLabel>
+                      </Step>
+                    ))}
+                  </Stepper>
+                </CardContent>
+              </Card>
 
-                <Alert severity="info" sx={{ mb: 3 }}>
-                  <AlertTitle>AI Generated Contract</AlertTitle>
-                  This contract has been generated using AI and will be reviewed by a licensed attorney before finalization.
-                </Alert>
-                
-                <Paper sx={{ p: 3, bgcolor: 'grey.50' }}>
-                  <Typography variant="h6" gutterBottom>
-                    {selectedTemplate.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    Generated on {new Date().toLocaleDateString()} • Ready for attorney review
-                  </Typography>
-                  
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    {Object.entries(formData).map(([key, value]) => {
-                      const field = selectedTemplate.fields.find(f => f.name === key);
-                      return (
-                        <Box key={key} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="body2" fontWeight="medium">
-                            {field?.label}:
-                          </Typography>
-                          <Typography variant="body2">
-                            {value}
-                          </Typography>
-                        </Box>
-                      );
-                    })}
+              {/* AI Assistant */}
+              <Card>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <WandIcon sx={{ mr: 1 }} />
+                    <Typography variant="h6" component="h2">
+                      AI Assistant
+                    </Typography>
                   </Box>
-                </Paper>
-              </CardContent>
-            </Card>
-          )}
-        </Grid>
-
-        {/* Sidebar */}
-        <Grid item xs={12} lg={4}>
-          {/* AI Assistant */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <MessageSquareIcon sx={{ mr: 1 }} />
-                <Typography variant="h6" component="h2">
-                  AI Assistant
-                </Typography>
-              </Box>
-              
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Alert severity="info">
-                  <Typography variant="body2">
-                    <strong>Tip:</strong> Make sure all property details are accurate. Our AI will generate a comprehensive contract based on your inputs.
-                  </Typography>
-                </Alert>
-                
-                <Alert severity="success">
-                  <Typography variant="body2">
-                    <strong>Legal Review:</strong> All generated contracts are reviewed by licensed attorneys before finalization.
-                  </Typography>
-                </Alert>
-                
-                <Alert severity="warning">
-                  <Typography variant="body2">
-                    <strong>Next Steps:</strong> After generation, your attorney will review and contact you within 24 hours.
-                  </Typography>
-                </Alert>
-              </Box>
-            </CardContent>
-          </Card>
-
-          {/* Process Steps */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Contract Process
-              </Typography>
-              
-              <Stepper activeStep={getActiveStep()} orientation="vertical">
-                {steps.map((label, index) => (
-                  <Step key={label}>
-                    <StepLabel>
-                      <Typography variant="body2" fontWeight="medium">
-                        {label}
-                      </Typography>
-                    </StepLabel>
-                  </Step>
-                ))}
-              </Stepper>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    </Container>
+                  
+                  <Alert severity="info" sx={{ mb: 2 }}>
+                    <AlertTitle>Tip:</AlertTitle>
+                    Make sure all property details are accurate. Our AI will generate a comprehensive contract based on your inputs.
+                  </Alert>
+                  
+                  <Alert severity="success" sx={{ mb: 2 }}>
+                    <AlertTitle>Legal Review:</AlertTitle>
+                    All generated contracts are reviewed by licensed attorneys before finalization.
+                  </Alert>
+                  
+                  <Alert severity="warning">
+                    <AlertTitle>Next Steps:</AlertTitle>
+                    After generation, your attorney will review and contact you within 24 hours.
+                  </Alert>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+    </Box>
   );
 }
-
-export default ContractGenerationPage;
 
