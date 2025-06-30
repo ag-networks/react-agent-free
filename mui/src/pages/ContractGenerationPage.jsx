@@ -72,11 +72,12 @@ export function ContractGenerationPage() {
       try {
         const contractService = new ContractService();
         const response = await contractService.getContractTemplates();
+        console.log('API Response:', response);
         setTemplates(response.templates || []);
       } catch (error) {
         console.error('Error loading templates:', error);
         // Set fallback templates if API fails
-        setTemplates([
+        const fallbackTemplates = [
           {
             id: '1',
             name: 'Purchase Agreement',
@@ -115,7 +116,9 @@ export function ContractGenerationPage() {
               { name: 'effectiveDate', label: 'Effective Date', type: 'date', required: true }
             ]
           }
-        ]);
+        ];
+        console.log('Setting fallback templates:', fallbackTemplates);
+        setTemplates(fallbackTemplates);
       } finally {
         setLoading(false);
       }
@@ -567,9 +570,23 @@ export function ContractGenerationPage() {
                                   {template.description}
                                 </Typography>
                                 <Chip 
-                                  label={template.category} 
+                                  label={template.category === 'purchase' ? 'Purchase' : 
+                                         template.category === 'lease' ? 'Lease' : 
+                                         template.category === 'amendment' ? 'Amendment' : 
+                                         template.category || 'Contract'} 
                                   color="success" 
                                   size="small"
+                                  variant="filled"
+                                  sx={{ 
+                                    textTransform: 'capitalize',
+                                    fontWeight: 'medium',
+                                    fontSize: '0.75rem',
+                                    height: 24,
+                                    '& .MuiChip-label': {
+                                      px: 1.5,
+                                      py: 0.5
+                                    }
+                                  }}
                                 />
                               </Box>
                               {selectedTemplate?.id === template.id && (

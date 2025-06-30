@@ -179,9 +179,44 @@ class ApiService {
 
   handleContractRequests(endpoint, method, body) {
     const mockTemplates = [
-      { id: '1', name: 'Purchase Agreement', type: 'purchase' },
-      { id: '2', name: 'Lease Agreement', type: 'lease' },
-      { id: '3', name: 'Amendment', type: 'amendment' }
+      { 
+        id: '1', 
+        name: 'Purchase Agreement', 
+        description: 'Standard real estate purchase agreement',
+        category: 'purchase',
+        fields: [
+          { name: 'buyerName', label: 'Buyer Name', type: 'text', required: true },
+          { name: 'sellerName', label: 'Seller Name', type: 'text', required: true },
+          { name: 'propertyAddress', label: 'Property Address', type: 'text', required: true },
+          { name: 'purchasePrice', label: 'Purchase Price', type: 'currency', required: true },
+          { name: 'closingDate', label: 'Closing Date', type: 'date', required: true }
+        ]
+      },
+      { 
+        id: '2', 
+        name: 'Lease Agreement', 
+        description: 'Residential lease agreement',
+        category: 'lease',
+        fields: [
+          { name: 'tenantName', label: 'Tenant Name', type: 'text', required: true },
+          { name: 'landlordName', label: 'Landlord Name', type: 'text', required: true },
+          { name: 'propertyAddress', label: 'Property Address', type: 'text', required: true },
+          { name: 'monthlyRent', label: 'Monthly Rent', type: 'currency', required: true },
+          { name: 'leaseStartDate', label: 'Lease Start Date', type: 'date', required: true },
+          { name: 'leaseEndDate', label: 'Lease End Date', type: 'date', required: true }
+        ]
+      },
+      { 
+        id: '3', 
+        name: 'Amendment', 
+        description: 'Contract amendment form',
+        category: 'amendment',
+        fields: [
+          { name: 'originalContractDate', label: 'Original Contract Date', type: 'date', required: true },
+          { name: 'amendmentDescription', label: 'Amendment Description', type: 'text', required: true },
+          { name: 'effectiveDate', label: 'Effective Date', type: 'date', required: true }
+        ]
+      }
     ];
 
     if (endpoint === '/contracts/templates') {
