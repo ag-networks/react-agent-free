@@ -135,7 +135,7 @@ export function PropertySearchPage() {
             </Box>
             
             <Grid container spacing={3} sx={{ mb: 3 }}>
-              <Grid item xs={12} md={6} lg={3}>
+              <Grid size={{ xs: 12, md: 6, lg: 3 }}>
                 <TextField
                   fullWidth
                   label="Location"
@@ -152,7 +152,7 @@ export function PropertySearchPage() {
                 />
               </Grid>
               
-              <Grid item xs={12} md={6} lg={3}>
+              <Grid size={{ xs: 12, md: 6, lg: 3 }}>
                 <TextField
                   fullWidth
                   label="Min Price"
@@ -170,7 +170,7 @@ export function PropertySearchPage() {
                 />
               </Grid>
               
-              <Grid item xs={12} md={6} lg={3}>
+              <Grid size={{ xs: 12, md: 6, lg: 3 }}>
                 <TextField
                   fullWidth
                   label="Max Price"
@@ -188,7 +188,7 @@ export function PropertySearchPage() {
                 />
               </Grid>
               
-              <Grid item xs={12} md={6} lg={3}>
+              <Grid size={{ xs: 12, md: 6, lg: 3 }}>
                 <FormControl fullWidth>
                   <InputLabel>Bedrooms</InputLabel>
                   <Select
@@ -251,7 +251,7 @@ export function PropertySearchPage() {
           {loading ? (
             // Loading skeletons
             Array.from(new Array(6)).map((_, index) => (
-              <Grid item xs={12} md={6} lg={4} key={index}>
+              <Grid size={{ xs: 12, md: 6, lg: 4 }} key={index}>
                 <Card>
                   <Skeleton variant="rectangular" height={200} />
                   <CardContent>
@@ -265,7 +265,7 @@ export function PropertySearchPage() {
           ) : (
             // Property cards
             properties.map((property) => (
-              <Grid item xs={12} md={6} lg={4} key={property.id}>
+              <Grid size={{ xs: 12, md: 6, lg: 4 }} key={property.id}>
                 <Card 
                   sx={{ 
                     height: '100%', 
