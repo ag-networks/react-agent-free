@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  database:
+    image: postgres:15-alpine
+    container_name: agent-free-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: agent_free_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./seeds.sql:/docker-entrypoint-initdb.d/02-seeds.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - agent-free-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d agent_free_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Node.js Backend API
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: agent-free-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 80
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_NAME: agent_free_db
+      DB_USER: postgres
+      DB_PASSWORD: password
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production-please
+    volumes:
+      - backend_uploads:/app/uploads
+    ports:
+      - "80:80"
+    networks:
+      - agent-free-network
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:80/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Redis Cache (optional, for session management and caching)
+  redis:
+    image: redis:7-alpine
+    container_name: agent-free-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass redispassword
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - agent-free-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Nginx Reverse Proxy (optional, for production)
+  nginx:
+    image: nginx:alpine
+    container_name: agent-free-nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    networks:
+      - agent-free-network
+    depends_on:
+      - backend
+    profiles:
+      - production
+
+# Named volumes for data persistence
+volumes:
+  postgres_data:
+    driver: local
+    name: agent-free-postgres-data
+  backend_uploads:
+    driver: local
+    name: agent-free-backend-uploads
+  redis_data:
+    driver: local
+    name: agent-free-redis-data
+
+# Custom network for service communication
+networks:
+  agent-free-network:
+    driver: bridge
+    name: agent-free-network
+
