@@ -40,7 +40,8 @@ import {
   CheckCircle as CheckIcon,
   Search as SearchIcon,
   Gavel as GavelIcon,
-  Add as AddIcon
+  Add as AddIcon,
+  Warning as WarningIcon
 } from '@mui/icons-material';
 
 const drawerWidth = 240;
@@ -229,7 +230,7 @@ export function DashboardPage() {
         <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
           {/* Stats Cards */}
           <Grid container spacing={3} sx={{ mb: 4 }}>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Card elevation={2}>
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -252,7 +253,7 @@ export function DashboardPage() {
               </Card>
             </Grid>
 
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Card elevation={2}>
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -275,7 +276,7 @@ export function DashboardPage() {
               </Card>
             </Grid>
 
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Card elevation={2}>
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -291,14 +292,14 @@ export function DashboardPage() {
                       </Typography>
                     </Box>
                     <Avatar sx={{ bgcolor: 'info.light' }}>
-                      <TimeIcon />
+                      <ClockIcon />
                     </Avatar>
                   </Box>
                 </CardContent>
               </Card>
             </Grid>
 
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Card elevation={2}>
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -314,7 +315,7 @@ export function DashboardPage() {
                       </Typography>
                     </Box>
                     <Avatar sx={{ bgcolor: 'success.light' }}>
-                      <CheckCircleIcon />
+                      <CheckIcon />
                     </Avatar>
                   </Box>
                 </CardContent>
@@ -324,7 +325,7 @@ export function DashboardPage() {
 
           <Grid container spacing={4}>
             {/* Active Transactions */}
-            <Grid item xs={12} lg={8}>
+            <Grid size={{ xs: 12, lg: 8 }}>
               <Card elevation={2}>
                 <CardContent>
                   <Typography variant="h5" sx={{ mb: 1, fontWeight: 600 }}>
@@ -383,7 +384,7 @@ export function DashboardPage() {
             </Grid>
 
             {/* Recent Activity & Quick Actions */}
-            <Grid item xs={12} lg={4}>
+            <Grid size={{ xs: 12, lg: 4 }}>
               <Card elevation={2} sx={{ mb: 3 }}>
                 <CardContent>
                   <Typography variant="h5" sx={{ mb: 1, fontWeight: 600 }}>
