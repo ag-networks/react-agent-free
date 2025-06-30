@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { 
   Search, 
   MapPin, 
@@ -16,12 +18,19 @@ import {
   DollarSign,
   Filter,
   Heart,
-  Share2
+  Share2,
+  Home,
+  FileText,
+  MessageSquare,
+  Settings,
+  LogOut
 } from 'lucide-react';
 import { propertyService } from '@/lib/api';
 import '../App.css';
 
 export function PropertySearchPage() {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -73,26 +82,75 @@ export function PropertySearchPage() {
     });
   };
 
+  const menuItems = [
+    { text: 'Dashboard', icon: Home, path: '/dashboard' },
+    { text: 'My Transactions', icon: FileText, path: '/properties', active: true },
+    { text: 'Documents', icon: FileText, path: '/documents' },
+    { text: 'Messages', icon: MessageSquare, path: '/messages' },
+    { text: 'Calendar', icon: Calendar, path: '/calendar' },
+    { text: 'Settings', icon: Settings, path: '/settings' }
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link to="/dashboard" className="text-2xl font-bold text-blue-600">
-              Agent Free
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Blue Sidebar */}
+      <div className="w-64 bg-blue-600 text-white flex flex-col">
+        {/* Logo */}
+        <div className="p-6">
+          <h1 className="text-2xl font-bold">Agent Free</h1>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-4">
+          {menuItems.map((item) => (
+            <Link
+              key={item.text}
+              to={item.path}
+              className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-colors ${
+                item.active 
+                  ? 'bg-blue-700 text-white' 
+                  : 'text-blue-100 hover:bg-blue-700 hover:text-white'
+              }`}
+            >
+              <item.icon className="h-5 w-5 mr-3" />
+              {item.text}
             </Link>
-            <nav className="flex space-x-8">
-              <Link to="/dashboard" className="text-gray-600 hover:text-gray-900">Dashboard</Link>
-              <Link to="/properties" className="text-blue-600 font-medium">Properties</Link>
-              <Link to="/transactions" className="text-gray-600 hover:text-gray-900">Transactions</Link>
-              <Link to="/messages" className="text-gray-600 hover:text-gray-900">Messages</Link>
-            </nav>
+          ))}
+        </nav>
+
+        {/* User Profile */}
+        <div className="p-4 border-t border-blue-500">
+          <div className="flex items-center mb-4">
+            <Avatar className="h-10 w-10 mr-3">
+              <AvatarFallback className="bg-blue-700 text-white">
+                {user?.firstName?.[0]}{user?.lastName?.[0]}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <p className="font-medium text-white">{user?.firstName} {user?.lastName}</p>
+              <p className="text-sm text-blue-200">{user?.email}</p>
+            </div>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={logout}
+            className="w-full text-blue-100 border-blue-400 hover:bg-blue-700 hover:text-white"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </Button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Main Content */}
+      <div className="flex-1 p-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Property Search</h1>
+          <p className="text-gray-600">Find your perfect property with AI-powered search</p>
+        </div>
+
         {/* Search Filters */}
         <Card className="mb-8">
           <CardHeader>
@@ -162,30 +220,22 @@ export function PropertySearchPage() {
         </Card>
 
         {/* Results */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-gray-900">
             {properties.length} Properties Found
           </h2>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">Sort by:</span>
-            <select className="px-3 py-1 border border-gray-300 rounded-md text-sm">
-              <option>Price: Low to High</option>
-              <option>Price: High to Low</option>
-              <option>Newest</option>
-              <option>Square Feet</option>
-            </select>
-          </div>
+          <p className="text-gray-600">Sort by: Price: Low to High</p>
         </div>
 
+        {/* Property Grid */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
+            {[...Array(6)].map((_, i) => (
               <Card key={i} className="animate-pulse">
                 <div className="h-48 bg-gray-200 rounded-t-lg"></div>
                 <CardContent className="p-4">
                   <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                  <div className="h-6 bg-gray-200 rounded mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded"></div>
+                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
                 </CardContent>
               </Card>
             ))}
@@ -195,10 +245,15 @@ export function PropertySearchPage() {
             {properties.map((property) => (
               <Card key={property.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="relative">
-                  <div className="h-48 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
-                    <span className="text-blue-600 text-sm">Property Image</span>
+                  <img
+                    src={property.image}
+                    alt={property.address}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="absolute top-3 left-3">
+                    <Badge className="bg-green-500 text-white">For Sale</Badge>
                   </div>
-                  <div className="absolute top-2 right-2 flex gap-2">
+                  <div className="absolute top-3 right-3 flex gap-2">
                     <Button size="sm" variant="secondary" className="h-8 w-8 p-0">
                       <Heart className="h-4 w-4" />
                     </Button>
@@ -206,65 +261,42 @@ export function PropertySearchPage() {
                       <Share2 className="h-4 w-4" />
                     </Button>
                   </div>
-                  <Badge className="absolute top-2 left-2 bg-green-600">
-                    {property.status}
-                  </Badge>
                 </div>
-                
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-2xl font-bold text-gray-900">
+                    <h3 className="text-xl font-bold text-gray-900">
                       {formatPrice(property.price)}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {property.daysOnMarket} days
-                    </span>
+                    </h3>
+                    <Badge variant="outline">{property.status}</Badge>
                   </div>
-                  
-                  <div className="flex items-center gap-4 mb-2 text-sm text-gray-600">
-                    <div className="flex items-center gap-1">
-                      <Bed className="h-4 w-4" />
+                  <p className="text-gray-600 mb-3 flex items-center">
+                    <MapPin className="h-4 w-4 mr-1" />
+                    {property.address}
+                  </p>
+                  <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+                    <span className="flex items-center">
+                      <Bed className="h-4 w-4 mr-1" />
                       {property.bedrooms} bed
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Bath className="h-4 w-4" />
+                    </span>
+                    <span className="flex items-center">
+                      <Bath className="h-4 w-4 mr-1" />
                       {property.bathrooms} bath
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Square className="h-4 w-4" />
-                      {property.sqft.toLocaleString()} sqft
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-1 mb-3">
-                    <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-gray-600 line-clamp-2">
-                      {property.address}
+                    </span>
+                    <span className="flex items-center">
+                      <Square className="h-4 w-4 mr-1" />
+                      {property.sqft} sqft
                     </span>
                   </div>
-                  
-                  <Separator className="my-3" />
-                  
                   <div className="flex items-center justify-between">
-                    <div className="text-xs text-gray-500">
-                      Listed {formatDate(property.listingDate)}
-                    </div>
-                    <Link to={`/properties/${property.id}`}>
-                      <Button size="sm">View Details</Button>
-                    </Link>
+                    <span className="text-sm text-gray-500 flex items-center">
+                      <Calendar className="h-4 w-4 mr-1" />
+                      Listed {formatDate(property.listedDate)}
+                    </span>
+                    <Button size="sm">View Details</Button>
                   </div>
                 </CardContent>
               </Card>
             ))}
-          </div>
-        )}
-
-        {/* Load More */}
-        {!loading && properties.length > 0 && (
-          <div className="text-center mt-8">
-            <Button variant="outline" size="lg">
-              Load More Properties
-            </Button>
           </div>
         )}
       </div>

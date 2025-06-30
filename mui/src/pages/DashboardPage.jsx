@@ -14,7 +14,7 @@ import {
   ListItemIcon,
   ListItemText,
   Container,
-  Grid,
+  Grid2 as Grid,
   Card,
   CardContent,
   Avatar,

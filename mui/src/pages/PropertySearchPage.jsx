@@ -1,42 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import {
-  AppBar,
-  Toolbar,
+  Box,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
   Typography,
-  Container,
-  Grid,
+  Avatar,
+  Button,
+  Grid2 as Grid,
   Card,
   CardContent,
-  CardMedia,
-  Button,
   TextField,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   Chip,
-  Box,
   IconButton,
+  InputAdornment,
   Skeleton,
-  Divider,
-  InputAdornment
+  Paper
 } from '@mui/material';
 import {
+  Home as HomeIcon,
+  Description as FileTextIcon,
+  Message as MessageIcon,
+  CalendarToday as CalendarIcon,
+  Settings as SettingsIcon,
   Search as SearchIcon,
-  LocationOn as LocationIcon,
+  LocationOn as MapPinIcon,
   Bed as BedIcon,
   Bathtub as BathIcon,
   SquareFoot as SquareIcon,
-  Favorite as FavoriteIcon,
-  Share as ShareIcon,
+  DateRange as CalendarDateIcon,
+  AttachMoney as DollarSignIcon,
   FilterList as FilterIcon,
-  AttachMoney as MoneyIcon
+  FavoriteBorder as HeartIcon,
+  Share as Share2Icon
 } from '@mui/icons-material';
 import { propertyService } from '../lib/api';
 
+const drawerWidth = 256;
+
 export function PropertySearchPage() {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -88,53 +101,120 @@ export function PropertySearchPage() {
     });
   };
 
+  const menuItems = [
+    { text: 'Dashboard', icon: HomeIcon, path: '/dashboard' },
+    { text: 'My Transactions', icon: FileTextIcon, path: '/properties', active: true },
+    { text: 'Documents', icon: FileTextIcon, path: '/documents' },
+    { text: 'Messages', icon: MessageIcon, path: '/messages' },
+    { text: 'Calendar', icon: CalendarIcon, path: '/calendar' },
+    { text: 'Settings', icon: SettingsIcon, path: '/settings' }
+  ];
+
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: 'grey.50', minHeight: '100vh' }}>
-      {/* Header */}
-      <AppBar position="static" sx={{ bgcolor: 'white', color: 'text.primary', boxShadow: 1 }}>
-        <Toolbar>
-          <Typography
-            variant="h6"
-            component={Link}
-            to="/dashboard"
-            sx={{ 
-              flexGrow: 1, 
-              textDecoration: 'none', 
-              color: 'primary.main',
-              fontWeight: 'bold'
-            }}
-          >
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'grey.50' }}>
+      {/* Blue Sidebar */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            bgcolor: 'primary.main',
+            color: 'white'
+          },
+        }}
+      >
+        {/* Logo */}
+        <Box sx={{ p: 3 }}>
+          <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold', color: 'white' }}>
             Agent Free
           </Typography>
-          <Box sx={{ display: 'flex', gap: 3 }}>
-            <Button component={Link} to="/dashboard" color="inherit">
-              Dashboard
-            </Button>
-            <Button component={Link} to="/properties" color="primary" sx={{ fontWeight: 'bold' }}>
-              Properties
-            </Button>
-            <Button component={Link} to="/transactions" color="inherit">
-              Transactions
-            </Button>
-            <Button component={Link} to="/messages" color="inherit">
-              Messages
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
+        </Box>
 
-      <Container maxWidth="xl" sx={{ py: 4 }}>
+        {/* Navigation */}
+        <List sx={{ flexGrow: 1, px: 2 }}>
+          {menuItems.map((item) => (
+            <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
+              <ListItemButton
+                component={Link}
+                to={item.path}
+                sx={{
+                  borderRadius: 2,
+                  color: item.active ? 'white' : 'primary.100',
+                  bgcolor: item.active ? 'primary.dark' : 'transparent',
+                  '&:hover': {
+                    bgcolor: 'primary.dark',
+                    color: 'white'
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                  <item.icon />
+                </ListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+
+        {/* User Profile */}
+        <Box sx={{ p: 2, borderTop: 1, borderColor: 'primary.dark' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Avatar sx={{ bgcolor: 'primary.dark', mr: 2 }}>
+              {user?.firstName?.[0]}{user?.lastName?.[0]}
+            </Avatar>
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography variant="body2" sx={{ fontWeight: 500, color: 'white' }}>
+                {user?.firstName} {user?.lastName}
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'primary.100' }}>
+                {user?.email}
+              </Typography>
+            </Box>
+          </Box>
+          <Button
+            fullWidth
+            variant="outlined"
+            size="small"
+            onClick={logout}
+            sx={{
+              color: 'primary.100',
+              borderColor: 'primary.100',
+              '&:hover': {
+                bgcolor: 'primary.dark',
+                borderColor: 'white',
+                color: 'white'
+              }
+            }}
+          >
+            Sign Out
+          </Button>
+        </Box>
+      </Drawer>
+
+      {/* Main Content */}
+      <Box component="main" sx={{ flexGrow: 1, p: 4 }}>
+        {/* Header */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h3" component="h1" sx={{ fontWeight: 'bold', color: 'text.primary', mb: 1 }}>
+            Property Search
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Find your perfect property with AI-powered search
+          </Typography>
+        </Box>
+
         {/* Search Filters */}
         <Card sx={{ mb: 4 }}>
           <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-              <SearchIcon color="primary" />
-              <Typography variant="h6" component="h2">
-                Search Properties
-              </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <SearchIcon sx={{ mr: 1 }} />
+              <Typography variant="h6">Search Properties</Typography>
             </Box>
             
-            <Grid container spacing={3} sx={{ mb: 3 }}>
+            <Grid container spacing={2} sx={{ mb: 3 }}>
               <Grid size={{ xs: 12, md: 6, lg: 3 }}>
                 <TextField
                   fullWidth
@@ -142,16 +222,8 @@ export function PropertySearchPage() {
                   placeholder="City, State or ZIP"
                   value={filters.location}
                   onChange={(e) => handleFilterChange('location', e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LocationIcon />
-                      </InputAdornment>
-                    ),
-                  }}
                 />
               </Grid>
-              
               <Grid size={{ xs: 12, md: 6, lg: 3 }}>
                 <TextField
                   fullWidth
@@ -161,15 +233,10 @@ export function PropertySearchPage() {
                   value={filters.minPrice}
                   onChange={(e) => handleFilterChange('minPrice', e.target.value)}
                   InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <MoneyIcon />
-                      </InputAdornment>
-                    ),
+                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
                   }}
                 />
               </Grid>
-              
               <Grid size={{ xs: 12, md: 6, lg: 3 }}>
                 <TextField
                   fullWidth
@@ -179,15 +246,10 @@ export function PropertySearchPage() {
                   value={filters.maxPrice}
                   onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
                   InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <MoneyIcon />
-                      </InputAdornment>
-                    ),
+                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
                   }}
                 />
               </Grid>
-              
               <Grid size={{ xs: 12, md: 6, lg: 3 }}>
                 <FormControl fullWidth>
                   <InputLabel>Bedrooms</InputLabel>
@@ -211,14 +273,12 @@ export function PropertySearchPage() {
                 variant="contained"
                 startIcon={<SearchIcon />}
                 onClick={handleSearch}
-                size="large"
               >
                 Search
               </Button>
               <Button
                 variant="outlined"
                 startIcon={<FilterIcon />}
-                size="large"
               >
                 More Filters
               </Button>
@@ -227,166 +287,113 @@ export function PropertySearchPage() {
         </Card>
 
         {/* Results Header */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
             {properties.length} Properties Found
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              Sort by:
-            </Typography>
-            <FormControl size="small" sx={{ minWidth: 150 }}>
-              <Select defaultValue="price-low" variant="outlined">
-                <MenuItem value="price-low">Price: Low to High</MenuItem>
-                <MenuItem value="price-high">Price: High to Low</MenuItem>
-                <MenuItem value="newest">Newest</MenuItem>
-                <MenuItem value="sqft">Square Feet</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
+          <Typography variant="body2" color="text.secondary">
+            Sort by: Price: Low to High
+          </Typography>
         </Box>
 
         {/* Property Grid */}
-        <Grid container spacing={3}>
-          {loading ? (
-            // Loading skeletons
-            Array.from(new Array(6)).map((_, index) => (
+        {loading ? (
+          <Grid container spacing={3}>
+            {[...Array(6)].map((_, index) => (
               <Grid size={{ xs: 12, md: 6, lg: 4 }} key={index}>
                 <Card>
                   <Skeleton variant="rectangular" height={200} />
                   <CardContent>
-                    <Skeleton variant="text" height={32} width="60%" />
-                    <Skeleton variant="text" height={24} width="80%" />
-                    <Skeleton variant="text" height={20} width="100%" />
+                    <Skeleton variant="text" height={32} />
+                    <Skeleton variant="text" height={24} />
+                    <Skeleton variant="text" height={20} width="60%" />
                   </CardContent>
                 </Card>
               </Grid>
-            ))
-          ) : (
-            // Property cards
-            properties.map((property) => (
+            ))}
+          </Grid>
+        ) : (
+          <Grid container spacing={3}>
+            {properties.map((property) => (
               <Grid size={{ xs: 12, md: 6, lg: 4 }} key={property.id}>
-                <Card 
-                  sx={{ 
-                    height: '100%', 
-                    display: 'flex', 
-                    flexDirection: 'column',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: 4
-                    }
-                  }}
-                >
+                <Card sx={{ height: '100%', '&:hover': { boxShadow: 4 } }}>
                   <Box sx={{ position: 'relative' }}>
-                    <CardMedia
-                      component="div"
+                    <Box
+                      component="img"
+                      src={property.image}
+                      alt={property.address}
                       sx={{
+                        width: '100%',
                         height: 200,
-                        background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
+                        objectFit: 'cover'
                       }}
-                    >
-                      <Typography variant="body2" color="primary">
-                        Property Image
-                      </Typography>
-                    </CardMedia>
-                    
-                    {/* Action buttons */}
-                    <Box sx={{ position: 'absolute', top: 8, right: 8, display: 'flex', gap: 1 }}>
-                      <IconButton 
-                        size="small" 
-                        sx={{ bgcolor: 'rgba(255,255,255,0.9)', '&:hover': { bgcolor: 'white' } }}
-                      >
-                        <FavoriteIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton 
-                        size="small"
-                        sx={{ bgcolor: 'rgba(255,255,255,0.9)', '&:hover': { bgcolor: 'white' } }}
-                      >
-                        <ShareIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
-                    
-                    {/* Status badge */}
+                    />
                     <Chip
-                      label={property.status}
+                      label="For Sale"
                       color="success"
                       size="small"
-                      sx={{ position: 'absolute', top: 8, left: 8 }}
+                      sx={{
+                        position: 'absolute',
+                        top: 12,
+                        left: 12
+                      }}
                     />
+                    <Box sx={{
+                      position: 'absolute',
+                      top: 12,
+                      right: 12,
+                      display: 'flex',
+                      gap: 1
+                    }}>
+                      <IconButton size="small" sx={{ bgcolor: 'white', '&:hover': { bgcolor: 'grey.100' } }}>
+                        <HeartIcon />
+                      </IconButton>
+                      <IconButton size="small" sx={{ bgcolor: 'white', '&:hover': { bgcolor: 'grey.100' } }}>
+                        <Share2Icon />
+                      </IconButton>
+                    </Box>
                   </Box>
-                  
-                  <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                  <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                      <Typography variant="h5" component="h3" sx={{ fontWeight: 'bold' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                         {formatPrice(property.price)}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {property.daysOnMarket} days
-                      </Typography>
+                      <Chip label={property.status} variant="outlined" size="small" />
                     </Box>
-                    
-                    <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <BedIcon fontSize="small" color="action" />
-                        <Typography variant="body2" color="text.secondary">
-                          {property.bedrooms} bed
-                        </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+                      <MapPinIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                      {property.address}
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2, mb: 2, fontSize: '0.875rem', color: 'text.secondary' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <BedIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                        {property.bedrooms} bed
                       </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <BathIcon fontSize="small" color="action" />
-                        <Typography variant="body2" color="text.secondary">
-                          {property.bathrooms} bath
-                        </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <BathIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                        {property.bathrooms} bath
                       </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <SquareIcon fontSize="small" color="action" />
-                        <Typography variant="body2" color="text.secondary">
-                          {property.sqft.toLocaleString()} sqft
-                        </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <SquareIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                        {property.sqft} sqft
                       </Box>
                     </Box>
-                    
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5, mb: 2 }}>
-                      <LocationIcon fontSize="small" color="action" sx={{ mt: 0.1 }} />
-                      <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
-                        {property.address}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
+                        <CalendarDateIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                        Listed {formatDate(property.listedDate)}
                       </Typography>
-                    </Box>
-                    
-                    <Divider sx={{ my: 2 }} />
-                    
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto' }}>
-                      <Typography variant="caption" color="text.secondary">
-                        Listed {formatDate(property.listingDate)}
-                      </Typography>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        onClick={() => navigate(`/properties/${property.id}`)}
-                      >
+                      <Button size="small" variant="contained">
                         View Details
                       </Button>
                     </Box>
                   </CardContent>
                 </Card>
               </Grid>
-            ))
-          )}
-        </Grid>
-
-        {/* Load More */}
-        {!loading && properties.length > 0 && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-            <Button variant="outlined" size="large">
-              Load More Properties
-            </Button>
-          </Box>
+            ))}
+          </Grid>
         )}
-      </Container>
+      </Box>
     </Box>
   );
 }

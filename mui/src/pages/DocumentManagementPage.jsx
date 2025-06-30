@@ -12,7 +12,7 @@ import {
   Typography,
   Avatar,
   Button,
-  Grid,
+  Grid2 as Grid,
   Card,
   CardContent,
   TextField,

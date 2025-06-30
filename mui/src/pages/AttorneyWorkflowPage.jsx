@@ -8,7 +8,7 @@ import {
   Button,
   Card,
   CardContent,
-  Grid,
+  Grid2 as Grid,
   Tabs,
   Tab,
   IconButton,

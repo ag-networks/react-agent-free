@@ -7,7 +7,7 @@ import {
   Button,
   Container,
   Box,
-  Grid,
+  Grid2 as Grid,
   Card,
   CardContent,
   TextField,
@@ -192,7 +192,7 @@ export function HomePage() {
         </Box>
 
         <Grid container spacing={4}>
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <Card
               elevation={2}
               sx={{
@@ -226,7 +226,7 @@ export function HomePage() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <Card
               elevation={2}
               sx={{
@@ -260,7 +260,7 @@ export function HomePage() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <Card
               elevation={2}
               sx={{
@@ -309,7 +309,7 @@ export function HomePage() {
           </Box>
 
           <Grid container spacing={4} justifyContent="center">
-            <Grid item xs={12} md={5}>
+            <Grid size={{ xs: 12, md: 5 }}>
               <Card elevation={2}>
                 <CardContent sx={{ p: 4, textAlign: 'center' }}>
                   <Typography variant="h4" sx={{ mb: 2, fontWeight: 600 }}>
@@ -335,7 +335,7 @@ export function HomePage() {
               </Card>
             </Grid>
 
-            <Grid item xs={12} md={5}>
+            <Grid size={{ xs: 12, md: 5 }}>
               <Card
                 elevation={4}
                 sx={{
