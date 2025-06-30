@@ -26,7 +26,7 @@ import {
   Scale as ScaleIcon,
   Message as MessageIcon,
   VideoCall as VideoIcon,
-  Calendar as CalendarIcon,
+  Event as CalendarIcon,
   Description as FileTextIcon,
   Schedule as ClockIcon,
   CheckCircle as CheckCircleIcon,
