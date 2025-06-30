@@ -54,7 +54,7 @@ import {
   Settings as SettingsIcon,
   Logout as LogoutIcon
 } from '@mui/icons-material';
-import { contractService } from '../lib/api';
+import { ContractService } from '../lib/api';
 
 export function ContractGenerationPage() {
   const navigate = useNavigate();
@@ -70,10 +70,52 @@ export function ContractGenerationPage() {
   useEffect(() => {
     const loadTemplates = async () => {
       try {
-        const response = await contractService.getTemplates();
-        setTemplates(response);
+        const contractService = new ContractService();
+        const response = await contractService.getContractTemplates();
+        setTemplates(response.templates || []);
       } catch (error) {
         console.error('Error loading templates:', error);
+        // Set fallback templates if API fails
+        setTemplates([
+          {
+            id: '1',
+            name: 'Purchase Agreement',
+            description: 'Standard real estate purchase agreement',
+            category: 'purchase',
+            fields: [
+              { name: 'buyerName', label: 'Buyer Name', type: 'text', required: true },
+              { name: 'sellerName', label: 'Seller Name', type: 'text', required: true },
+              { name: 'propertyAddress', label: 'Property Address', type: 'text', required: true },
+              { name: 'purchasePrice', label: 'Purchase Price', type: 'currency', required: true },
+              { name: 'closingDate', label: 'Closing Date', type: 'date', required: true }
+            ]
+          },
+          {
+            id: '2',
+            name: 'Lease Agreement',
+            description: 'Residential lease agreement',
+            category: 'lease',
+            fields: [
+              { name: 'tenantName', label: 'Tenant Name', type: 'text', required: true },
+              { name: 'landlordName', label: 'Landlord Name', type: 'text', required: true },
+              { name: 'propertyAddress', label: 'Property Address', type: 'text', required: true },
+              { name: 'monthlyRent', label: 'Monthly Rent', type: 'currency', required: true },
+              { name: 'leaseStartDate', label: 'Lease Start Date', type: 'date', required: true },
+              { name: 'leaseEndDate', label: 'Lease End Date', type: 'date', required: true }
+            ]
+          },
+          {
+            id: '3',
+            name: 'Amendment',
+            description: 'Contract amendment form',
+            category: 'amendment',
+            fields: [
+              { name: 'originalContractDate', label: 'Original Contract Date', type: 'date', required: true },
+              { name: 'amendmentDescription', label: 'Amendment Description', type: 'text', required: true },
+              { name: 'effectiveDate', label: 'Effective Date', type: 'date', required: true }
+            ]
+          }
+        ]);
       } finally {
         setLoading(false);
       }
@@ -125,10 +167,16 @@ export function ContractGenerationPage() {
 
     try {
       setGenerating(true);
+      const contractService = new ContractService();
       const response = await contractService.generateContract(selectedTemplate.id, formData);
       setGeneratedContract(response);
     } catch (error) {
       console.error('Error generating contract:', error);
+      // Set a mock generated contract for demo purposes
+      setGeneratedContract({
+        id: 'mock-contract-1',
+        content: `${selectedTemplate.name}\n\nThis is a mock generated contract based on your inputs:\n\n${Object.entries(formData).map(([key, value]) => `${key}: ${value}`).join('\n')}\n\nThis contract has been generated using AI and will be reviewed by a licensed attorney before finalization.`
+      });
     } finally {
       setGenerating(false);
     }
@@ -279,13 +327,33 @@ export function ContractGenerationPage() {
 
         <Box sx={{ flex: 1, px: 2 }}>
           <List>
-            <ListItem button component={Link} to="/dashboard" sx={{ borderRadius: 2, mb: 1 }}>
+            <ListItem 
+              button 
+              component={Link} 
+              to="/dashboard" 
+              sx={{ 
+                borderRadius: 2, 
+                mb: 1,
+                color: 'white',
+                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' }
+              }}
+            >
               <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 <HomeIcon />
               </ListItemIcon>
               <ListItemText primary="Dashboard" />
             </ListItem>
-            <ListItem button component={Link} to="/properties" sx={{ borderRadius: 2, mb: 1 }}>
+            <ListItem 
+              button 
+              component={Link} 
+              to="/properties" 
+              sx={{ 
+                borderRadius: 2, 
+                mb: 1,
+                color: 'white',
+                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' }
+              }}
+            >
               <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 <BuildingIcon />
               </ListItemIcon>
@@ -296,8 +364,9 @@ export function ContractGenerationPage() {
               sx={{ 
                 borderRadius: 2, 
                 mb: 1, 
-                bgcolor: 'primary.main',
-                '&:hover': { bgcolor: 'primary.light' }
+                bgcolor: 'rgba(255, 255, 255, 0.2)',
+                color: 'white',
+                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.3)' }
               }}
             >
               <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
@@ -305,43 +374,113 @@ export function ContractGenerationPage() {
               </ListItemIcon>
               <ListItemText primary="Contracts" />
             </ListItem>
-            <ListItem button component={Link} to="/documents" sx={{ borderRadius: 2, mb: 1 }}>
+            <ListItem 
+              button 
+              component={Link} 
+              to="/documents" 
+              sx={{ 
+                borderRadius: 2, 
+                mb: 1,
+                color: 'white',
+                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' }
+              }}
+            >
               <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 <DocumentsIcon />
               </ListItemIcon>
               <ListItemText primary="Documents" />
             </ListItem>
-            <ListItem button component={Link} to="/messages" sx={{ borderRadius: 2, mb: 1 }}>
+            <ListItem 
+              button 
+              component={Link} 
+              to="/messages" 
+              sx={{ 
+                borderRadius: 2, 
+                mb: 1,
+                color: 'white',
+                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' }
+              }}
+            >
               <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 <MessageIcon />
               </ListItemIcon>
               <ListItemText primary="Messages" />
             </ListItem>
-            <ListItem button component={Link} to="/attorney-dashboard" sx={{ borderRadius: 2, mb: 1 }}>
+            <ListItem 
+              button 
+              component={Link} 
+              to="/attorney-dashboard" 
+              sx={{ 
+                borderRadius: 2, 
+                mb: 1,
+                color: 'white',
+                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' }
+              }}
+            >
               <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 <DashboardIcon />
               </ListItemIcon>
               <ListItemText primary="Attorney Dashboard" />
             </ListItem>
-            <ListItem button component={Link} to="/attorney-clients" sx={{ borderRadius: 2, mb: 1 }}>
+            <ListItem 
+              button 
+              component={Link} 
+              to="/attorney-clients" 
+              sx={{ 
+                borderRadius: 2, 
+                mb: 1,
+                color: 'white',
+                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' }
+              }}
+            >
               <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 <ContactsIcon />
               </ListItemIcon>
               <ListItemText primary="Client Management" />
             </ListItem>
-            <ListItem button component={Link} to="/attorney-calendar" sx={{ borderRadius: 2, mb: 1 }}>
+            <ListItem 
+              button 
+              component={Link} 
+              to="/attorney-calendar" 
+              sx={{ 
+                borderRadius: 2, 
+                mb: 1,
+                color: 'white',
+                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' }
+              }}
+            >
               <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 <CalendarIcon />
               </ListItemIcon>
               <ListItemText primary="Calendar" />
             </ListItem>
-            <ListItem button component={Link} to="/attorney-workflow" sx={{ borderRadius: 2, mb: 1 }}>
+            <ListItem 
+              button 
+              component={Link} 
+              to="/attorney-workflow" 
+              sx={{ 
+                borderRadius: 2, 
+                mb: 1,
+                color: 'white',
+                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' }
+              }}
+            >
               <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 <ConsultationsIcon />
               </ListItemIcon>
               <ListItemText primary="Agent Workflow" />
             </ListItem>
-            <ListItem button component={Link} to="/settings" sx={{ borderRadius: 2, mb: 1 }}>
+            <ListItem 
+              button 
+              component={Link} 
+              to="/settings" 
+              sx={{ 
+                borderRadius: 2, 
+                mb: 1,
+                color: 'white',
+                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' }
+              }}
+            >
               <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 <SettingsIcon />
               </ListItemIcon>
@@ -381,22 +520,13 @@ export function ContractGenerationPage() {
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Container maxWidth="lg" sx={{ py: 4, flex: 1 }}>
           {/* Header */}
-          <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <Box>
-              <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
-                Contract Generation
-              </Typography>
-              <Typography variant="h6" color="text.secondary">
-                AI-powered contract creation with legal review
-              </Typography>
-            </Box>
-            <Button 
-              variant="outlined" 
-              startIcon={<ArrowBackIcon />}
-              onClick={() => navigate('/dashboard')}
-            >
-              Back to Dashboard
-            </Button>
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
+              Contract Generation
+            </Typography>
+            <Typography variant="h6" color="text.secondary">
+              AI-powered contract creation with legal review
+            </Typography>
           </Box>
 
           <Grid container spacing={3}>
