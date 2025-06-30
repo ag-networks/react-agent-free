@@ -3,7 +3,7 @@
 
 class ApiService {
   constructor() {
-    this.baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+    this.baseUrl = 'http://localhost:3001/api'; // Simplified for mock implementation
     this.delay = 500; // Simulate network delay
   }
 
