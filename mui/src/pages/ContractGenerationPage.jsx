@@ -532,12 +532,10 @@ export function ContractGenerationPage() {
             </Typography>
           </Box>
 
-          <Grid container spacing={3}>
-            {/* Main Content */}
-            <Grid item xs={12} lg={8}>
-              {/* Template Selection */}
-              <Card sx={{ mb: 3 }}>
-                <CardContent>
+          <Box>
+            {/* Template Selection */}
+            <Card sx={{ mb: 3 }}>
+              <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <FileTextIcon sx={{ mr: 1 }} />
                     <Typography variant="h6" component="h2">
@@ -689,10 +687,7 @@ export function ContractGenerationPage() {
                   </CardContent>
                 </Card>
               )}
-            </Grid>
 
-            {/* Sidebar */}
-            <Grid item xs={12} lg={4}>
               {/* Progress Stepper */}
               <Card sx={{ mb: 3 }}>
                 <CardContent>
@@ -735,8 +730,7 @@ export function ContractGenerationPage() {
                   </Alert>
                 </CardContent>
               </Card>
-            </Grid>
-          </Grid>
+            </Box>
         </Container>
       </Box>
     </Box>
