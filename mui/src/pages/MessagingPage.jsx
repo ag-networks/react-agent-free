@@ -1,506 +1,330 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import Sidebar from '../components/Sidebar';
 import {
-  Container,
+  Box,
+  Typography,
   Grid,
   Card,
   CardContent,
-  Typography,
-  Button,
   TextField,
-  Box,
-  Chip,
+  Button,
   Avatar,
-  IconButton,
-  Paper,
-  Divider,
-  InputAdornment,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
-  ListItemSecondaryAction,
+  Divider,
+  Paper,
+  IconButton,
   Badge,
-  Skeleton
+  Chip,
+  Container
 } from '@mui/material';
 import {
-  Chat as MessageSquareIcon,
   Send as SendIcon,
-  AttachFile as PaperclipIcon,
+  AttachFile as AttachFileIcon,
   Phone as PhoneIcon,
-  VideoCall as VideoIcon,
-  MoreVert as MoreVerticalIcon,
-  Search as SearchIcon,
-  Add as PlusIcon,
-  Schedule as ClockIcon,
-  CheckCircle as CheckCircleIcon,
-  Person as UserIcon,
-  Gavel as ScaleIcon,
-  Home as HomeIcon,
-  Description as FileTextIcon,
-  Event as CalendarIcon,
-  ArrowBack as ArrowBackIcon
+  VideoCall as VideoCallIcon,
+  MoreVert as MoreVertIcon,
+  Circle as CircleIcon
 } from '@mui/icons-material';
-import { messageService, attorneyService } from '../lib/api';
 
 export function MessagingPage() {
-  const navigate = useNavigate();
-  const [conversations, setConversations] = useState([]);
-  const [selectedConversation, setSelectedConversation] = useState(null);
-  const [messages, setMessages] = useState([]);
+  const { user, logout } = useAuth();
+  const [selectedConversation, setSelectedConversation] = useState(0);
   const [newMessage, setNewMessage] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
-  const messagesEndRef = useRef(null);
 
-  useEffect(() => {
-    loadConversations();
-  }, []);
-
-  useEffect(() => {
-    if (selectedConversation) {
-      loadMessages(selectedConversation.id);
+  const conversations = [
+    {
+      id: 1,
+      name: 'Sarah Johnson',
+      role: 'Attorney',
+      lastMessage: 'The contract review is complete. I have a few minor suggestions.',
+      timestamp: '2 min ago',
+      unread: 2,
+      online: true,
+      avatar: 'SJ'
+    },
+    {
+      id: 2,
+      name: 'Michael Chen',
+      role: 'Attorney',
+      lastMessage: 'Perfect! The inspection report looks good. Ready to proceed.',
+      timestamp: '1 hour ago',
+      unread: 0,
+      online: true,
+      avatar: 'MC'
+    },
+    {
+      id: 3,
+      name: 'Emily Rodriguez',
+      role: 'Attorney',
+      lastMessage: 'I\'ll review the financing documents and get back to you by tomorrow.',
+      timestamp: '3 hours ago',
+      unread: 1,
+      online: false,
+      avatar: 'ER'
+    },
+    {
+      id: 4,
+      name: 'Agent Free Support',
+      role: 'Support Team',
+      lastMessage: 'Welcome to Agent Free! How can we help you today?',
+      timestamp: '1 day ago',
+      unread: 0,
+      online: true,
+      avatar: 'AF'
     }
-  }, [selectedConversation]);
+  ];
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const loadConversations = async () => {
-    try {
-      setLoading(true);
-      const response = await messageService.getConversations();
-      setConversations(response.conversations);
-      if (response.conversations.length > 0) {
-        setSelectedConversation(response.conversations[0]);
-      }
-    } catch (error) {
-      console.error('Error loading conversations:', error);
-    } finally {
-      setLoading(false);
+  const messages = [
+    {
+      id: 1,
+      sender: 'Sarah Johnson',
+      content: 'Hi! I\'ve completed the initial review of your purchase agreement.',
+      timestamp: '10:30 AM',
+      isOwn: false
+    },
+    {
+      id: 2,
+      sender: 'You',
+      content: 'Great! What are your thoughts?',
+      timestamp: '10:32 AM',
+      isOwn: true
+    },
+    {
+      id: 3,
+      sender: 'Sarah Johnson',
+      content: 'Overall it looks very good. I have a few minor suggestions that could strengthen your position.',
+      timestamp: '10:35 AM',
+      isOwn: false
+    },
+    {
+      id: 4,
+      sender: 'Sarah Johnson',
+      content: 'Would you like to schedule a call to discuss the details?',
+      timestamp: '10:36 AM',
+      isOwn: false
+    },
+    {
+      id: 5,
+      sender: 'You',
+      content: 'Yes, that would be perfect. When are you available?',
+      timestamp: '10:38 AM',
+      isOwn: true
     }
-  };
+  ];
 
-  const loadMessages = async (conversationId) => {
-    try {
-      const response = await messageService.getMessages(conversationId);
-      setMessages(response.messages);
-      // Mark as read
-      await messageService.markAsRead(conversationId);
-    } catch (error) {
-      console.error('Error loading messages:', error);
-    }
-  };
-
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedConversation || sending) return;
-
-    try {
-      setSending(true);
-      await messageService.sendMessage(selectedConversation.id, newMessage);
-      
-      // Add message to local state immediately for better UX
-      const newMsg = {
-        id: Date.now(),
-        conversationId: selectedConversation.id,
-        senderId: 1, // Current user ID
-        content: newMessage,
-        timestamp: new Date().toISOString(),
-        type: 'text'
-      };
-      
-      setMessages(prev => [...prev, newMsg]);
+  const handleSendMessage = () => {
+    if (newMessage.trim()) {
+      // Handle sending message
       setNewMessage('');
-      
-      // Refresh conversations to update last message
-      loadConversations();
-    } catch (error) {
-      console.error('Error sending message:', error);
-    } finally {
-      setSending(false);
     }
   };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-
-  const formatTime = (timestamp) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffInHours = (now - date) / (1000 * 60 * 60);
-    
-    if (diffInHours < 24) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } else {
-      return date.toLocaleDateString();
-    }
-  };
-
-  const getParticipantInfo = (conversation, excludeCurrentUser = false) => {
-    const currentUserId = 1; // Mock current user ID
-    const otherParticipants = conversation.participants.filter(p => 
-      excludeCurrentUser ? p.id !== currentUserId : true
-    );
-    return otherParticipants[0] || conversation.participants[0];
-  };
-
-  if (loading) {
-    return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box sx={{ mb: 4 }}>
-          <Skeleton variant="text" width="40%" height={40} />
-          <Skeleton variant="text" width="60%" height={24} />
-        </Box>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={4}>
-            <Skeleton variant="rectangular" height={400} />
-          </Grid>
-          <Grid item xs={12} md={8}>
-            <Skeleton variant="rectangular" height={400} />
-          </Grid>
-        </Grid>
-      </Container>
-    );
-  }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Header */}
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <Box>
-          <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
-            Messages
-          </Typography>
-          <Typography variant="h6" color="text.secondary">
-            Secure communication with your attorney
-          </Typography>
-        </Box>
-        <Button 
-          variant="outlined" 
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/dashboard')}
-        >
-          Back to Dashboard
-        </Button>
-      </Box>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'grey.50' }}>
+      {/* Shared Sidebar */}
+      <Sidebar user={user} onSignOut={logout} />
+      
+      {/* Main Content */}
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', ml: '280px' }}>
+        <Container maxWidth="lg" sx={{ py: 4, flex: 1 }}>
+          {/* Header */}
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
+              Messages
+            </Typography>
+            <Typography variant="h6" color="text.secondary">
+              Communicate with attorneys and transaction participants
+            </Typography>
+          </Box>
 
-      <Grid container spacing={3} sx={{ height: 'calc(100vh - 250px)' }}>
-        {/* Conversations List */}
-        <Grid item xs={12} md={4}>
-          <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <CardContent sx={{ pb: 0 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <MessageSquareIcon />
-                  <Typography variant="h6">Conversations</Typography>
+          {/* Messaging Interface */}
+          <Card elevation={2} sx={{ height: 'calc(100vh - 200px)' }}>
+            <Box sx={{ display: 'flex', height: '100%' }}>
+              {/* Conversations List */}
+              <Box sx={{ width: 350, borderRight: 1, borderColor: 'divider' }}>
+                <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+                  <Typography variant="h6" fontWeight="bold">
+                    Conversations
+                  </Typography>
                 </Box>
-                <IconButton size="small">
-                  <PlusIcon />
-                </IconButton>
-              </Box>
-              
-              <TextField
-                fullWidth
-                placeholder="Search conversations..."
-                size="small"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{ mb: 2 }}
-              />
-            </CardContent>
-            
-            <Box sx={{ flex: 1, overflow: 'auto' }}>
-              <List sx={{ p: 0 }}>
-                {conversations.map((conversation) => {
-                  const participant = getParticipantInfo(conversation, true);
-                  const isSelected = selectedConversation?.id === conversation.id;
-                  
-                  return (
-                    <ListItem
-                      key={conversation.id}
-                      button
-                      selected={isSelected}
-                      onClick={() => setSelectedConversation(conversation)}
-                      sx={{
-                        borderBottom: 1,
-                        borderColor: 'divider',
-                        '&.Mui-selected': {
-                          bgcolor: 'primary.50',
-                          borderColor: 'primary.main'
-                        }
-                      }}
-                    >
-                      <ListItemAvatar>
-                        <Avatar src={participant.avatar}>
-                          {participant.name.split(' ').map(n => n[0]).join('')}
-                        </Avatar>
-                      </ListItemAvatar>
-                      
-                      <ListItemText
-                        primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography variant="subtitle2" noWrap>
-                              {participant.name}
-                            </Typography>
-                            {conversation.unreadCount > 0 && (
-                              <Badge badgeContent={conversation.unreadCount} color="primary" />
-                            )}
-                          </Box>
-                        }
-                        secondary={
-                          <Box>
-                            <Box sx={{ display: 'flex', gap: 0.5, mb: 0.5 }}>
-                              <Chip label={participant.role} size="small" color="secondary" />
-                              {conversation.transactionId && (
-                                <Chip 
-                                  icon={<HomeIcon />} 
-                                  label="Transaction" 
-                                  size="small" 
-                                  variant="outlined" 
-                                />
+                <List sx={{ p: 0, height: 'calc(100% - 80px)', overflow: 'auto' }}>
+                  {conversations.map((conversation, index) => (
+                    <React.Fragment key={conversation.id}>
+                      <ListItem
+                        button
+                        selected={selectedConversation === index}
+                        onClick={() => setSelectedConversation(index)}
+                        sx={{
+                          py: 2,
+                          '&.Mui-selected': {
+                            bgcolor: 'primary.light',
+                            '&:hover': {
+                              bgcolor: 'primary.light',
+                            },
+                          },
+                        }}
+                      >
+                        <ListItemAvatar>
+                          <Badge
+                            overlap="circular"
+                            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                            badgeContent={
+                              conversation.online ? (
+                                <CircleIcon sx={{ fontSize: 12, color: 'success.main' }} />
+                              ) : null
+                            }
+                          >
+                            <Avatar sx={{ bgcolor: 'primary.main' }}>
+                              {conversation.avatar}
+                            </Avatar>
+                          </Badge>
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <Typography variant="subtitle1" fontWeight="bold">
+                                {conversation.name}
+                              </Typography>
+                              {conversation.unread > 0 && (
+                                <Badge badgeContent={conversation.unread} color="primary" />
                               )}
                             </Box>
-                            <Typography variant="body2" color="text.secondary" noWrap>
-                              {conversation.lastMessage?.content}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {formatTime(conversation.lastMessage?.timestamp)}
-                            </Typography>
-                          </Box>
-                        }
-                      />
-                    </ListItem>
-                  );
-                })}
-              </List>
-            </Box>
-          </Card>
-        </Grid>
-
-        {/* Chat Area */}
-        <Grid item xs={12} md={8}>
-          {selectedConversation ? (
-            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-              {/* Chat Header */}
-              <CardContent sx={{ borderBottom: 1, borderColor: 'divider', pb: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar src={getParticipantInfo(selectedConversation, true).avatar}>
-                      {getParticipantInfo(selectedConversation, true).name.split(' ').map(n => n[0]).join('')}
-                    </Avatar>
-                    
-                    <Box>
-                      <Typography variant="h6">
-                        {getParticipantInfo(selectedConversation, true).name}
-                      </Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Chip 
-                          label={getParticipantInfo(selectedConversation, true).role} 
-                          size="small" 
-                          color="secondary" 
+                          }
+                          secondary={
+                            <Box>
+                              <Chip label={conversation.role} size="small" variant="outlined" sx={{ mb: 0.5 }} />
+                              <Typography variant="body2" color="text.secondary" noWrap>
+                                {conversation.lastMessage}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {conversation.timestamp}
+                              </Typography>
+                            </Box>
+                          }
                         />
-                        <Typography variant="caption" color="success.main">
-                          Online
+                      </ListItem>
+                      {index < conversations.length - 1 && <Divider />}
+                    </React.Fragment>
+                  ))}
+                </List>
+              </Box>
+
+              {/* Chat Area */}
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                {/* Chat Header */}
+                <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
+                      {conversations[selectedConversation]?.avatar}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="h6" fontWeight="bold">
+                        {conversations[selectedConversation]?.name}
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <CircleIcon 
+                          sx={{ 
+                            fontSize: 8, 
+                            color: conversations[selectedConversation]?.online ? 'success.main' : 'grey.400',
+                            mr: 0.5 
+                          }} 
+                        />
+                        <Typography variant="caption" color="text.secondary">
+                          {conversations[selectedConversation]?.online ? 'Online' : 'Offline'}
                         </Typography>
                       </Box>
                     </Box>
                   </Box>
-                  
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <IconButton>
+                  <Box>
+                    <IconButton color="primary">
                       <PhoneIcon />
                     </IconButton>
-                    <IconButton>
-                      <VideoIcon />
+                    <IconButton color="primary">
+                      <VideoCallIcon />
                     </IconButton>
                     <IconButton>
-                      <MoreVerticalIcon />
+                      <MoreVertIcon />
                     </IconButton>
                   </Box>
                 </Box>
-              </CardContent>
 
-              {/* Messages */}
-              <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
-                {messages.map((message) => {
-                  const isCurrentUser = message.senderId === 1; // Mock current user ID
-                  const sender = selectedConversation.participants.find(p => p.id === message.senderId);
-                  
-                  return (
+                {/* Messages */}
+                <Box sx={{ flex: 1, p: 2, overflow: 'auto', bgcolor: 'grey.50' }}>
+                  {messages.map((message) => (
                     <Box
                       key={message.id}
                       sx={{
                         display: 'flex',
-                        justifyContent: isCurrentUser ? 'flex-end' : 'flex-start',
-                        mb: 2
+                        justifyContent: message.isOwn ? 'flex-end' : 'flex-start',
+                        mb: 2,
                       }}
                     >
-                      <Box sx={{ 
-                        display: 'flex', 
-                        gap: 1, 
-                        maxWidth: '70%',
-                        flexDirection: isCurrentUser ? 'row-reverse' : 'row'
-                      }}>
-                        {!isCurrentUser && (
-                          <Avatar sx={{ width: 32, height: 32 }} src={sender?.avatar}>
-                            {sender?.name.split(' ').map(n => n[0]).join('')}
-                          </Avatar>
-                        )}
-                        
-                        <Paper
+                      <Paper
+                        sx={{
+                          p: 2,
+                          maxWidth: '70%',
+                          bgcolor: message.isOwn ? 'primary.main' : 'white',
+                          color: message.isOwn ? 'white' : 'text.primary',
+                        }}
+                      >
+                        <Typography variant="body1">
+                          {message.content}
+                        </Typography>
+                        <Typography
+                          variant="caption"
                           sx={{
-                            p: 1.5,
-                            bgcolor: isCurrentUser ? 'primary.main' : 'grey.100',
-                            color: isCurrentUser ? 'primary.contrastText' : 'text.primary'
+                            display: 'block',
+                            mt: 1,
+                            opacity: 0.7,
                           }}
                         >
-                          <Typography variant="body2">
-                            {message.content}
-                          </Typography>
-                          <Typography 
-                            variant="caption" 
-                            sx={{ 
-                              color: isCurrentUser ? 'primary.50' : 'text.secondary',
-                              display: 'block',
-                              mt: 0.5
-                            }}
-                          >
-                            {formatTime(message.timestamp)}
-                          </Typography>
-                        </Paper>
-                      </Box>
+                          {message.timestamp}
+                        </Typography>
+                      </Paper>
                     </Box>
-                  );
-                })}
-                <div ref={messagesEndRef} />
-              </Box>
+                  ))}
+                </Box>
 
-              {/* Message Input */}
-              <Box sx={{ borderTop: 1, borderColor: 'divider', p: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1 }}>
-                  <IconButton>
-                    <PaperclipIcon />
-                  </IconButton>
-                  
-                  <TextField
-                    fullWidth
-                    multiline
-                    maxRows={4}
-                    placeholder="Type your message..."
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    variant="outlined"
-                    size="small"
-                  />
-                  
-                  <IconButton 
-                    color="primary"
-                    onClick={handleSendMessage}
-                    disabled={!newMessage.trim() || sending}
-                  >
-                    {sending ? (
-                      <Box sx={{ 
-                        width: 20, 
-                        height: 20, 
-                        border: 2, 
-                        borderColor: 'primary.main',
-                        borderTopColor: 'transparent',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite',
-                        '@keyframes spin': {
-                          '0%': { transform: 'rotate(0deg)' },
-                          '100%': { transform: 'rotate(360deg)' }
+                {/* Message Input */}
+                <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <TextField
+                      fullWidth
+                      placeholder="Type your message..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSendMessage();
                         }
-                      }} />
-                    ) : (
-                      <SendIcon />
-                    )}
-                  </IconButton>
+                      }}
+                      multiline
+                      maxRows={3}
+                    />
+                    <IconButton color="primary">
+                      <AttachFileIcon />
+                    </IconButton>
+                    <Button
+                      variant="contained"
+                      endIcon={<SendIcon />}
+                      onClick={handleSendMessage}
+                      disabled={!newMessage.trim()}
+                    >
+                      Send
+                    </Button>
+                  </Box>
                 </Box>
               </Box>
-            </Card>
-          ) : (
-            <Card sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CardContent sx={{ textAlign: 'center' }}>
-                <MessageSquareIcon sx={{ fontSize: 64, color: 'grey.300', mb: 2 }} />
-                <Typography variant="h6" gutterBottom>
-                  Select a conversation
-                </Typography>
-                <Typography color="text.secondary">
-                  Choose a conversation from the list to start messaging
-                </Typography>
-              </CardContent>
-            </Card>
-          )}
-        </Grid>
-      </Grid>
-
-      {/* Quick Actions */}
-      {selectedConversation && (
-        <Card sx={{ mt: 3 }}>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <ScaleIcon />
-              <Typography variant="h6">Transaction Quick Actions</Typography>
             </Box>
-            
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} md={3}>
-                <Button 
-                  variant="outlined" 
-                  fullWidth 
-                  startIcon={<FileTextIcon />}
-                >
-                  View Contract
-                </Button>
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <Button 
-                  variant="outlined" 
-                  fullWidth 
-                  startIcon={<CalendarIcon />}
-                >
-                  Schedule Meeting
-                </Button>
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <Button 
-                  variant="outlined" 
-                  fullWidth 
-                  startIcon={<ClockIcon />}
-                >
-                  Check Timeline
-                </Button>
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <Button 
-                  variant="outlined" 
-                  fullWidth 
-                  startIcon={<CheckCircleIcon />}
-                >
-                  Update Status
-                </Button>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-      )}
-    </Container>
+          </Card>
+        </Container>
+      </Box>
+    </Box>
   );
 }
 
