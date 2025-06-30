@@ -11,7 +11,7 @@ import { PropertySearchPage } from './pages/PropertySearchPage';
 import { ContractGenerationPage } from './pages/ContractGenerationPage';
 import { DocumentManagementPage } from './pages/DocumentManagementPage';
 import { MessagingPage } from './pages/MessagingPage';
-import { AttorneyWorkflowPage } from './pages/AttorneyWorkflowPage';
+import AttorneyWorkflowPage from './pages/AttorneyWorkflowPage';
 import AttorneyDashboardPage from './pages/AttorneyDashboardPage';
 import AttorneyClientManagementPage from './pages/AttorneyClientManagementPage';
 import AttorneyCalendarPage from './pages/AttorneyCalendarPage';
