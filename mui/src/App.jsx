@@ -12,6 +12,9 @@ import { ContractGenerationPage } from './pages/ContractGenerationPage';
 import { DocumentManagementPage } from './pages/DocumentManagementPage';
 import { MessagingPage } from './pages/MessagingPage';
 import { AttorneyWorkflowPage } from './pages/AttorneyWorkflowPage';
+import AttorneyDashboardPage from './pages/AttorneyDashboardPage';
+import AttorneyClientManagementPage from './pages/AttorneyClientManagementPage';
+import AttorneyCalendarPage from './pages/AttorneyCalendarPage';
 import agentFreeTheme from './theme/theme';
 
 function App() {
@@ -78,6 +81,32 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AttorneyWorkflowPage />
+                </ProtectedRoute>
+              } 
+            />
+
+            {/* Attorney Routes */}
+            <Route 
+              path="/attorney-dashboard" 
+              element={
+                <ProtectedRoute>
+                  <AttorneyDashboardPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/attorney-clients" 
+              element={
+                <ProtectedRoute>
+                  <AttorneyClientManagementPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/attorney-calendar" 
+              element={
+                <ProtectedRoute>
+                  <AttorneyCalendarPage />
                 </ProtectedRoute>
               } 
             />

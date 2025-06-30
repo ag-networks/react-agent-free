@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import * as Avatar from '@radix-ui/react-avatar';
-import * as Button from '@radix-ui/react-button';
-import * as Card from '@radix-ui/react-card';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Select from '@radix-ui/react-select';
 import * as Tabs from '@radix-ui/react-tabs';
@@ -318,9 +316,9 @@ const AttorneyCalendarPage = () => {
                   </div>
                 </div>
                 <Dialog.Close asChild>
-                  <Button.Root className="p-2 text-gray-400 hover:text-gray-600">
+                  <button className="p-2 text-gray-400 hover:text-gray-600">
                     <X className="w-5 h-5" />
-                  </Button.Root>
+                  </button>
                 </Dialog.Close>
               </div>
 
@@ -412,19 +410,19 @@ const AttorneyCalendarPage = () => {
                 {/* Actions */}
                 <div className="flex justify-between items-center pt-4 border-t border-gray-200">
                   <div className="flex space-x-2">
-                    <Button.Root className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                       <Edit className="w-4 h-4" />
                       <span>Edit Event</span>
-                    </Button.Root>
-                    <Button.Root className="flex items-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                    </button>
+                    <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
                       <Send className="w-4 h-4" />
                       <span>Send Reminder</span>
-                    </Button.Root>
+                    </button>
                   </div>
-                  <Button.Root className="flex items-center space-x-2 px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors">
+                  <button className="flex items-center space-x-2 px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors">
                     <CalendarX className="w-4 h-4" />
                     <span>Cancel Event</span>
-                  </Button.Root>
+                  </button>
                 </div>
               </div>
             </div>
@@ -443,9 +441,9 @@ const AttorneyCalendarPage = () => {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">Create New Event</h2>
               <Dialog.Close asChild>
-                <Button.Root className="p-2 text-gray-400 hover:text-gray-600">
+                <button className="p-2 text-gray-400 hover:text-gray-600">
                   <X className="w-5 h-5" />
-                </Button.Root>
+                </button>
               </Dialog.Close>
             </div>
 
@@ -465,33 +463,67 @@ const AttorneyCalendarPage = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
                   <Select.Root value={eventForm.type} onValueChange={(value) => setEventForm({...eventForm, type: value})}>
-                    <Select.Trigger className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                      <span className="capitalize">{eventForm.type}</span>
-                      <ChevronDown className="w-4 h-4" />
+                    <Select.Trigger className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 flex items-center justify-between">
+                      <Select.Value>
+                        <span className="capitalize">{eventForm.type}</span>
+                      </Select.Value>
+                      <Select.Icon>
+                        <ChevronDown className="w-4 h-4" />
+                      </Select.Icon>
                     </Select.Trigger>
-                    <Select.Content className="bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                      <Select.Item value="consultation" className="px-3 py-2 hover:bg-gray-100 cursor-pointer">Consultation</Select.Item>
-                      <Select.Item value="review" className="px-3 py-2 hover:bg-gray-100 cursor-pointer">Contract Review</Select.Item>
-                      <Select.Item value="closing" className="px-3 py-2 hover:bg-gray-100 cursor-pointer">Closing</Select.Item>
-                      <Select.Item value="meeting" className="px-3 py-2 hover:bg-gray-100 cursor-pointer">Meeting</Select.Item>
-                      <Select.Item value="inspection" className="px-3 py-2 hover:bg-gray-100 cursor-pointer">Inspection</Select.Item>
-                    </Select.Content>
+                    <Select.Portal>
+                      <Select.Content className="bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                        <Select.Viewport className="p-1">
+                          <Select.Item value="consultation" className="px-3 py-2 hover:bg-gray-100 cursor-pointer rounded">
+                            <Select.ItemText>Consultation</Select.ItemText>
+                          </Select.Item>
+                          <Select.Item value="review" className="px-3 py-2 hover:bg-gray-100 cursor-pointer rounded">
+                            <Select.ItemText>Contract Review</Select.ItemText>
+                          </Select.Item>
+                          <Select.Item value="closing" className="px-3 py-2 hover:bg-gray-100 cursor-pointer rounded">
+                            <Select.ItemText>Closing</Select.ItemText>
+                          </Select.Item>
+                          <Select.Item value="meeting" className="px-3 py-2 hover:bg-gray-100 cursor-pointer rounded">
+                            <Select.ItemText>Meeting</Select.ItemText>
+                          </Select.Item>
+                          <Select.Item value="inspection" className="px-3 py-2 hover:bg-gray-100 cursor-pointer rounded">
+                            <Select.ItemText>Inspection</Select.ItemText>
+                          </Select.Item>
+                        </Select.Viewport>
+                      </Select.Content>
+                    </Select.Portal>
                   </Select.Root>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
                   <Select.Root value={eventForm.priority} onValueChange={(value) => setEventForm({...eventForm, priority: value})}>
-                    <Select.Trigger className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                      <span className="capitalize">{eventForm.priority}</span>
-                      <ChevronDown className="w-4 h-4" />
+                    <Select.Trigger className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 flex items-center justify-between">
+                      <Select.Value>
+                        <span className="capitalize">{eventForm.priority}</span>
+                      </Select.Value>
+                      <Select.Icon>
+                        <ChevronDown className="w-4 h-4" />
+                      </Select.Icon>
                     </Select.Trigger>
-                    <Select.Content className="bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                      <Select.Item value="low" className="px-3 py-2 hover:bg-gray-100 cursor-pointer">Low</Select.Item>
-                      <Select.Item value="medium" className="px-3 py-2 hover:bg-gray-100 cursor-pointer">Medium</Select.Item>
-                      <Select.Item value="high" className="px-3 py-2 hover:bg-gray-100 cursor-pointer">High</Select.Item>
-                      <Select.Item value="urgent" className="px-3 py-2 hover:bg-gray-100 cursor-pointer">Urgent</Select.Item>
-                    </Select.Content>
+                    <Select.Portal>
+                      <Select.Content className="bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                        <Select.Viewport className="p-1">
+                          <Select.Item value="low" className="px-3 py-2 hover:bg-gray-100 cursor-pointer rounded">
+                            <Select.ItemText>Low</Select.ItemText>
+                          </Select.Item>
+                          <Select.Item value="medium" className="px-3 py-2 hover:bg-gray-100 cursor-pointer rounded">
+                            <Select.ItemText>Medium</Select.ItemText>
+                          </Select.Item>
+                          <Select.Item value="high" className="px-3 py-2 hover:bg-gray-100 cursor-pointer rounded">
+                            <Select.ItemText>High</Select.ItemText>
+                          </Select.Item>
+                          <Select.Item value="urgent" className="px-3 py-2 hover:bg-gray-100 cursor-pointer rounded">
+                            <Select.ItemText>Urgent</Select.ItemText>
+                          </Select.Item>
+                        </Select.Viewport>
+                      </Select.Content>
+                    </Select.Portal>
                   </Select.Root>
                 </div>
               </div>
@@ -576,18 +608,18 @@ const AttorneyCalendarPage = () => {
             </div>
 
             <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
-              <Button.Root 
+              <button 
                 onClick={() => setShowCreateEvent(false)}
                 className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Cancel
-              </Button.Root>
-              <Button.Root 
+              </button>
+              <button 
                 onClick={handleCreateEvent}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Create Event
-              </Button.Root>
+              </button>
             </div>
           </div>
         </Dialog.Content>
@@ -659,13 +691,13 @@ const AttorneyCalendarPage = () => {
               </p>
             </div>
           </div>
-          <Button.Root 
+          <button 
             onClick={signOut}
             className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-blue-800 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <LogOut className="w-4 h-4" />
             <span>Sign Out</span>
-          </Button.Root>
+          </button>
         </div>
       </div>
 
@@ -679,13 +711,13 @@ const AttorneyCalendarPage = () => {
               <p className="text-gray-600">Manage your schedule and appointments</p>
             </div>
             <div className="flex items-center space-x-4">
-              <Button.Root 
+              <button 
                 onClick={() => setShowCreateEvent(true)}
                 className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <CalendarPlus className="w-4 h-4" />
                 <span>New Event</span>
-              </Button.Root>
+              </button>
             </div>
           </div>
         </header>
@@ -697,34 +729,48 @@ const AttorneyCalendarPage = () => {
             <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <Button.Root 
+                  <button 
                     onClick={handlePrevMonth}
                     className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                   >
                     <ChevronLeft className="w-5 h-5" />
-                  </Button.Root>
+                  </button>
                   <h2 className="text-xl font-semibold text-gray-900">
                     {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                   </h2>
-                  <Button.Root 
+                  <button 
                     onClick={handleNextMonth}
                     className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                   >
                     <ChevronRight className="w-5 h-5" />
-                  </Button.Root>
+                  </button>
                 </div>
                 
                 <div className="flex items-center space-x-2">
                   <Select.Root value={viewMode} onValueChange={setViewMode}>
                     <Select.Trigger className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                      <span className="capitalize">{viewMode}</span>
-                      <ChevronDown className="w-4 h-4" />
+                      <Select.Value>
+                        <span className="capitalize">{viewMode}</span>
+                      </Select.Value>
+                      <Select.Icon>
+                        <ChevronDown className="w-4 h-4" />
+                      </Select.Icon>
                     </Select.Trigger>
-                    <Select.Content className="bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                      <Select.Item value="month" className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Month</Select.Item>
-                      <Select.Item value="week" className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Week</Select.Item>
-                      <Select.Item value="day" className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Day</Select.Item>
-                    </Select.Content>
+                    <Select.Portal>
+                      <Select.Content className="bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                        <Select.Viewport className="p-1">
+                          <Select.Item value="month" className="px-4 py-2 hover:bg-gray-100 cursor-pointer rounded">
+                            <Select.ItemText>Month</Select.ItemText>
+                          </Select.Item>
+                          <Select.Item value="week" className="px-4 py-2 hover:bg-gray-100 cursor-pointer rounded">
+                            <Select.ItemText>Week</Select.ItemText>
+                          </Select.Item>
+                          <Select.Item value="day" className="px-4 py-2 hover:bg-gray-100 cursor-pointer rounded">
+                            <Select.ItemText>Day</Select.ItemText>
+                          </Select.Item>
+                        </Select.Viewport>
+                      </Select.Content>
+                    </Select.Portal>
                   </Select.Root>
                 </div>
               </div>

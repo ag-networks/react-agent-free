@@ -3,8 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import * as Tabs from '@radix-ui/react-tabs';
 import * as Avatar from '@radix-ui/react-avatar';
-import * as Button from '@radix-ui/react-button';
-import * as Card from '@radix-ui/react-card';
 import * as Progress from '@radix-ui/react-progress';
 import { 
   Scale, 
