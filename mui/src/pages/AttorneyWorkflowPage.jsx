@@ -8,7 +8,7 @@ import {
   Button,
   Card,
   CardContent,
-  Grid2 as Grid,
+  Grid,
   Tabs,
   Tab,
   IconButton,
@@ -213,7 +213,7 @@ export function AttorneyWorkflowPage() {
       <Box sx={{ p: 3 }}>
         <Grid container spacing={3}>
           {/* Left Column - 2/3 width */}
-          <Grid size={{ xs: 12, lg: 8 }}>
+          <Grid item xs={12} lg={8}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               {/* Pending Client Consultations */}
               <Card elevation={1}>
@@ -240,7 +240,7 @@ export function AttorneyWorkflowPage() {
                 <CardContent>
                   <Grid container spacing={2}>
                     {pendingConsultations.map((consultation) => (
-                      <Grid size={{ xs: 12, md: 6 }} key={consultation.id}>
+                      <Grid item xs={12} md={6} key={consultation.id}>
                         <Paper variant="outlined" sx={{ p: 2 }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
@@ -288,7 +288,7 @@ export function AttorneyWorkflowPage() {
                 <CardContent>
                   <Grid container spacing={2}>
                     {contractReviews.map((review) => (
-                      <Grid size={{ xs: 12, md: 6 }} key={review.id}>
+                      <Grid item xs={12} md={6} key={review.id}>
                         <Paper variant="outlined" sx={{ p: 2 }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
@@ -364,7 +364,7 @@ export function AttorneyWorkflowPage() {
           </Grid>
 
           {/* Right Column - 1/3 width */}
-          <Grid size={{ xs: 12, lg: 4 }}>
+          <Grid item xs={12} lg={4}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               {/* Calendar */}
               <Card elevation={1}>

@@ -12,7 +12,7 @@ import {
   Typography,
   Avatar,
   Button,
-  Grid2 as Grid,
+  Grid,
   Card,
   CardContent,
   TextField,
@@ -279,7 +279,7 @@ export function DocumentManagementPage() {
 
         <Grid container spacing={4}>
           {/* Main Content - 2/3 width */}
-          <Grid size={{ xs: 12, lg: 8 }}>
+          <Grid item xs={12} lg={8}>
             {/* Upload Documents */}
             <Card sx={{ mb: 3 }}>
               <CardContent>
@@ -350,7 +350,7 @@ export function DocumentManagementPage() {
             <Card sx={{ mb: 3 }}>
               <CardContent>
                 <Grid container spacing={2}>
-                  <Grid size={{ xs: 12, md: 8 }}>
+                  <Grid item xs={12} md={8}>
                     <TextField
                       fullWidth
                       placeholder="Search documents..."
@@ -365,7 +365,7 @@ export function DocumentManagementPage() {
                       }}
                     />
                   </Grid>
-                  <Grid size={{ xs: 12, md: 4 }}>
+                  <Grid item xs={12} md={4}>
                     <FormControl fullWidth>
                       <InputLabel>Status</InputLabel>
                       <Select
@@ -472,7 +472,7 @@ export function DocumentManagementPage() {
           </Grid>
 
           {/* Right Sidebar - 1/3 width */}
-          <Grid size={{ xs: 12, lg: 4 }}>
+          <Grid item xs={12} lg={4}>
             {/* Document Summary */}
             <Card sx={{ mb: 3 }}>
               <CardContent>

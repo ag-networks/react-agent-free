@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
-  Grid2 as Grid,
+  Grid,
   Card,
   CardContent,
   Typography,
@@ -236,10 +236,10 @@ export function ContractGenerationPage() {
           <Skeleton variant="text" width="60%" height={24} />
         </Box>
         <Grid container spacing={3}>
-          <Grid size={{ xs: 12, lg: 8 }}>
+          <Grid item xs={12} lg={8}>
             <Skeleton variant="rectangular" height={300} />
           </Grid>
-          <Grid size={{ xs: 12, lg: 4 }}>
+          <Grid item xs={12} lg={4}>
             <Skeleton variant="rectangular" height={200} />
           </Grid>
         </Grid>
@@ -270,7 +270,7 @@ export function ContractGenerationPage() {
 
       <Grid container spacing={3}>
         {/* Main Content */}
-        <Grid size={{ xs: 12, lg: 8 }}>
+        <Grid item xs={12} lg={8}>
           {/* Template Selection */}
           <Card sx={{ mb: 3 }}>
             <CardContent>
@@ -283,7 +283,7 @@ export function ContractGenerationPage() {
               
               <Grid container spacing={2}>
                 {templates.map((template) => (
-                  <Grid size={{ xs: 12, md: 6 }} key={template.id}>
+                  <Grid item xs={12} md={6} key={template.id}>
                     <Card 
                       sx={{ 
                         cursor: 'pointer',
@@ -336,7 +336,7 @@ export function ContractGenerationPage() {
 
                 <Grid container spacing={2}>
                   {selectedTemplate.fields.map((field, index) => (
-                    <Grid size={{ xs: 12, md: 6 }} key={field.name}>
+                    <Grid item xs={12} md={6} key={field.name}>
                       {renderFormField(field)}
                     </Grid>
                   ))}
@@ -424,7 +424,7 @@ export function ContractGenerationPage() {
         </Grid>
 
         {/* Sidebar */}
-        <Grid size={{ xs: 12, lg: 4 }}>
+        <Grid item xs={12} lg={4}>
           {/* AI Assistant */}
           <Card sx={{ mb: 3 }}>
             <CardContent>

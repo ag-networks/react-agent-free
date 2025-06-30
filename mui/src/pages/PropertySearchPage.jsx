@@ -12,7 +12,7 @@ import {
   Typography,
   Avatar,
   Button,
-  Grid2 as Grid,
+  Grid,
   Card,
   CardContent,
   TextField,
@@ -215,7 +215,7 @@ export function PropertySearchPage() {
             </Box>
             
             <Grid container spacing={2} sx={{ mb: 3 }}>
-              <Grid size={{ xs: 12, md: 6, lg: 3 }}>
+              <Grid item xs={12} md={6} lg={3}>
                 <TextField
                   fullWidth
                   label="Location"
@@ -224,7 +224,7 @@ export function PropertySearchPage() {
                   onChange={(e) => handleFilterChange('location', e.target.value)}
                 />
               </Grid>
-              <Grid size={{ xs: 12, md: 6, lg: 3 }}>
+              <Grid item xs={12} md={6} lg={3}>
                 <TextField
                   fullWidth
                   label="Min Price"
@@ -237,7 +237,7 @@ export function PropertySearchPage() {
                   }}
                 />
               </Grid>
-              <Grid size={{ xs: 12, md: 6, lg: 3 }}>
+              <Grid item xs={12} md={6} lg={3}>
                 <TextField
                   fullWidth
                   label="Max Price"
@@ -250,7 +250,7 @@ export function PropertySearchPage() {
                   }}
                 />
               </Grid>
-              <Grid size={{ xs: 12, md: 6, lg: 3 }}>
+              <Grid item xs={12} md={6} lg={3}>
                 <FormControl fullWidth>
                   <InputLabel>Bedrooms</InputLabel>
                   <Select
@@ -300,7 +300,7 @@ export function PropertySearchPage() {
         {loading ? (
           <Grid container spacing={3}>
             {[...Array(6)].map((_, index) => (
-              <Grid size={{ xs: 12, md: 6, lg: 4 }} key={index}>
+              <Grid item xs={12} md={6} lg={4} key={index}>
                 <Card>
                   <Skeleton variant="rectangular" height={200} />
                   <CardContent>
@@ -315,7 +315,7 @@ export function PropertySearchPage() {
         ) : (
           <Grid container spacing={3}>
             {properties.map((property) => (
-              <Grid size={{ xs: 12, md: 6, lg: 4 }} key={property.id}>
+              <Grid item xs={12} md={6} lg={4} key={property.id}>
                 <Card sx={{ height: '100%', '&:hover': { boxShadow: 4 } }}>
                   <Box sx={{ position: 'relative' }}>
                     <Box

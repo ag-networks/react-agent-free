@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
-  Grid2 as Grid,
+  Grid,
   Card,
   CardContent,
   Typography,
@@ -161,10 +161,10 @@ export function MessagingPage() {
           <Skeleton variant="text" width="60%" height={24} />
         </Box>
         <Grid container spacing={3}>
-          <Grid size={{ xs: 12, md: 4 }}>
+          <Grid item xs={12} md={4}>
             <Skeleton variant="rectangular" height={400} />
           </Grid>
-          <Grid size={{ xs: 12, md: 8 }}>
+          <Grid item xs={12} md={8}>
             <Skeleton variant="rectangular" height={400} />
           </Grid>
         </Grid>
@@ -195,7 +195,7 @@ export function MessagingPage() {
 
       <Grid container spacing={3} sx={{ height: 'calc(100vh - 250px)' }}>
         {/* Conversations List */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid item xs={12} md={4}>
           <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <CardContent sx={{ pb: 0 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -292,7 +292,7 @@ export function MessagingPage() {
         </Grid>
 
         {/* Chat Area */}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid item xs={12} md={8}>
           {selectedConversation ? (
             <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
               {/* Chat Header */}
@@ -460,7 +460,7 @@ export function MessagingPage() {
             </Box>
             
             <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid item xs={12} sm={6} md={3}>
                 <Button 
                   variant="outlined" 
                   fullWidth 
@@ -469,7 +469,7 @@ export function MessagingPage() {
                   View Contract
                 </Button>
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid item xs={12} sm={6} md={3}>
                 <Button 
                   variant="outlined" 
                   fullWidth 
@@ -478,7 +478,7 @@ export function MessagingPage() {
                   Schedule Meeting
                 </Button>
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid item xs={12} sm={6} md={3}>
                 <Button 
                   variant="outlined" 
                   fullWidth 
@@ -487,7 +487,7 @@ export function MessagingPage() {
                   Check Timeline
                 </Button>
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid item xs={12} sm={6} md={3}>
                 <Button 
                   variant="outlined" 
                   fullWidth 
