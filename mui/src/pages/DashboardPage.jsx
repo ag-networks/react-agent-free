@@ -1,22 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import Sidebar from '../components/Sidebar';
 import {
   Box,
-  Drawer,
-  AppBar,
-  Toolbar,
-  List,
-  Typography,
-  Divider,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
   Container,
   Grid,
   Card,
   CardContent,
+  Typography,
   Avatar,
   Button,
   Chip,
@@ -26,73 +18,56 @@ import {
   Badge,
 } from '@mui/material';
 import {
-  Home as HomeIcon,
-  Dashboard as DashboardIcon,
-  Description as DescriptionIcon,
-  Message as MessageIcon,
-  Event as CalendarIcon,
-  Settings as SettingsIcon,
-  ExitToApp as ExitIcon,
-  Notifications as NotificationsIcon,
-  Person as PersonIcon,
   AttachMoney as MoneyIcon,
   Schedule as ClockIcon,
   CheckCircle as CheckIcon,
   Search as SearchIcon,
   Gavel as GavelIcon,
   Add as AddIcon,
-  Warning as WarningIcon
+  Warning as WarningIcon,
+  Notifications as NotificationsIcon
 } from '@mui/icons-material';
-
-const drawerWidth = 240;
 
 export function DashboardPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Mock data for dashboard
+  const stats = [
+    { title: 'Active Transactions', value: '3', icon: MoneyIcon, color: 'primary' },
+    { title: 'Pending Reviews', value: '2', icon: ClockIcon, color: 'warning' },
+    { title: 'Completed Deals', value: '12', icon: CheckIcon, color: 'success' },
+    { title: 'Saved Properties', value: '8', icon: SearchIcon, color: 'info' },
+  ];
+
   const transactions = [
     {
       id: 1,
-      property: '123 Oak Street, San Francisco, CA',
+      property: '123 Main St, San Francisco, CA',
+      type: 'Purchase',
       status: 'contract_review',
       progress: 25,
-      nextStep: 'Attorney review pending',
-      price: '$750,000',
-      type: 'purchase'
+      attorney: 'Sarah Johnson',
+      nextStep: 'Contract review scheduled for tomorrow'
     },
     {
       id: 2,
-      property: '456 Pine Avenue, Oakland, CA',
+      property: '456 Oak Ave, Oakland, CA',
+      type: 'Sale',
       status: 'inspection',
       progress: 60,
-      nextStep: 'Inspection scheduled for tomorrow',
-      price: '$520,000',
-      type: 'sale'
-    }
-  ];
-
-  const recentActivity = [
-    {
-      id: 1,
-      type: 'document',
-      message: 'Contract uploaded for 123 Oak Street',
-      time: '2 hours ago',
-      icon: DescriptionIcon
-    },
-    {
-      id: 2,
-      type: 'attorney',
-      message: 'Attorney Sarah Johnson assigned to your case',
-      time: '1 day ago',
-      icon: PersonIcon
+      attorney: 'Michael Chen',
+      nextStep: 'Inspection completed, awaiting report'
     },
     {
       id: 3,
-      type: 'message',
-      message: 'New message from your attorney',
-      time: '2 days ago',
-      icon: MessageIcon
+      property: '789 Pine St, Berkeley, CA',
+      type: 'Purchase',
+      status: 'financing',
+      progress: 80,
+      attorney: 'Emily Rodriguez',
+      nextStep: 'Final loan approval pending'
     }
   ];
 
@@ -116,344 +91,206 @@ export function DashboardPage() {
     }
   };
 
-  const menuItems = [
-    { text: 'Dashboard', icon: DashboardIcon, path: '/dashboard' },
-    { text: 'Property Search', icon: SearchIcon, path: '/properties' },
-    { text: 'Contracts', icon: DescriptionIcon, path: '/contracts' },
-    { text: 'Documents', icon: DescriptionIcon, path: '/documents' },
-    { text: 'Messages', icon: MessageIcon, path: '/messages' },
-    { text: 'Attorneys', icon: GavelIcon, path: '/attorneys' },
-  ];
-
   return (
-    <Box sx={{ display: 'flex' }}>
-      {/* Sidebar */}
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-          },
-        }}
-      >
-        <Toolbar>
-          <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
-            <HomeIcon />
-          </Avatar>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            Agent Free
-          </Typography>
-        </Toolbar>
-        
-        <Divider />
-        
-        <List sx={{ flexGrow: 1 }}>
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isSelected = location.pathname === item.path;
-            return (
-              <ListItem key={item.text} disablePadding>
-                <ListItemButton
-                  selected={isSelected}
-                  onClick={() => navigate(item.path)}
-                >
-                  <ListItemIcon>
-                    <Icon color={isSelected ? 'primary' : 'inherit'} />
-                  </ListItemIcon>
-                  <ListItemText primary={item.text} />
-                </ListItemButton>
-              </ListItem>
-            );
-          })}
-        </List>
-
-        <Divider />
-        
-        {/* User Profile */}
-        <Box sx={{ p: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Avatar sx={{ mr: 2 }}>
-              {user?.firstName?.[0]}{user?.lastName?.[0]}
-            </Avatar>
-            <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-              <Typography variant="subtitle2" noWrap>
-                {user?.firstName} {user?.lastName}
-              </Typography>
-              <Typography variant="caption" color="text.secondary" noWrap>
-                {user?.email}
-              </Typography>
-            </Box>
-          </Box>
-          <Button
-            fullWidth
-            variant="outlined"
-            size="small"
-            startIcon={<ExitIcon />}
-            onClick={logout}
-          >
-            Sign Out
-          </Button>
-        </Box>
-      </Drawer>
-
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'grey.50' }}>
+      {/* Shared Sidebar */}
+      <Sidebar user={user} onSignOut={logout} />
+      
       {/* Main Content */}
-      <Box component="main" sx={{ flexGrow: 1 }}>
-        {/* Header */}
-        <AppBar position="static" elevation={1}>
-          <Toolbar>
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="h4" sx={{ fontWeight: 600 }}>
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', ml: '280px' }}>
+        <Container maxWidth="lg" sx={{ py: 4, flex: 1 }}>
+          {/* Header */}
+          <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box>
+              <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
                 Dashboard
               </Typography>
-              <Typography variant="subtitle1" color="text.secondary">
-                Welcome back, {user?.firstName}!
+              <Typography variant="h6" color="text.secondary">
+                Welcome back, {user?.firstName || 'User'}!
               </Typography>
             </Box>
-            <IconButton color="inherit" sx={{ mr: 1 }}>
+            <IconButton color="primary" sx={{ mr: 1 }}>
               <Badge badgeContent={3} color="error">
                 <NotificationsIcon />
               </Badge>
             </IconButton>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              sx={{ ml: 1 }}
-            >
-              New Transaction
-            </Button>
-          </Toolbar>
-        </AppBar>
+          </Box>
 
-        <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
           {/* Stats Cards */}
           <Grid container spacing={3} sx={{ mb: 4 }}>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card elevation={2}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Box>
-                      <Typography color="text.secondary" gutterBottom variant="overline">
-                        Active Transactions
-                      </Typography>
-                      <Typography variant="h3" sx={{ fontWeight: 700 }}>
-                        2
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        +1 from last month
-                      </Typography>
-                    </Box>
-                    <Avatar sx={{ bgcolor: 'primary.light' }}>
-                      <DescriptionIcon />
-                    </Avatar>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid item xs={12} sm={6} md={3}>
-              <Card elevation={2}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Box>
-                      <Typography color="text.secondary" gutterBottom variant="overline">
-                        Total Saved
-                      </Typography>
-                      <Typography variant="h3" sx={{ fontWeight: 700 }}>
-                        $31,000
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        vs traditional agents
-                      </Typography>
-                    </Box>
-                    <Avatar sx={{ bgcolor: 'success.light' }}>
-                      <MoneyIcon />
-                    </Avatar>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid item xs={12} sm={6} md={3}>
-              <Card elevation={2}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Box>
-                      <Typography color="text.secondary" gutterBottom variant="overline">
-                        Avg. Process Time
-                      </Typography>
-                      <Typography variant="h3" sx={{ fontWeight: 700 }}>
-                        28 days
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        15% faster than average
-                      </Typography>
-                    </Box>
-                    <Avatar sx={{ bgcolor: 'info.light' }}>
-                      <ClockIcon />
-                    </Avatar>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid item xs={12} sm={6} md={3}>
-              <Card elevation={2}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Box>
-                      <Typography color="text.secondary" gutterBottom variant="overline">
-                        Success Rate
-                      </Typography>
-                      <Typography variant="h3" sx={{ fontWeight: 700 }}>
-                        98%
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Successful closings
-                      </Typography>
-                    </Box>
-                    <Avatar sx={{ bgcolor: 'success.light' }}>
-                      <CheckIcon />
-                    </Avatar>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-
-          <Grid container spacing={4}>
-            {/* Active Transactions */}
-            <Grid item xs={12} lg={8}>
-              <Card elevation={2}>
-                <CardContent>
-                  <Typography variant="h5" sx={{ mb: 1, fontWeight: 600 }}>
-                    Active Transactions
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    Your current real estate transactions and their progress
-                  </Typography>
-
-                  <Box sx={{ space: 3 }}>
-                    {transactions.map((transaction) => (
-                      <Paper
-                        key={transaction.id}
-                        elevation={1}
-                        sx={{ p: 3, mb: 2, borderRadius: 2 }}
-                      >
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                          <Box>
-                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                              {transaction.property}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {transaction.type === 'purchase' ? 'Purchasing' : 'Selling'} • {transaction.price}
-                            </Typography>
-                          </Box>
-                          <Chip
-                            label={getStatusText(transaction.status)}
-                            color={getStatusColor(transaction.status)}
-                            size="small"
-                          />
-                        </Box>
-
-                        <Box sx={{ mb: 2 }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                            <Typography variant="body2">Progress</Typography>
-                            <Typography variant="body2">{transaction.progress}%</Typography>
-                          </Box>
-                          <LinearProgress
-                            variant="determinate"
-                            value={transaction.progress}
-                            sx={{ height: 8, borderRadius: 4 }}
-                          />
-                        </Box>
-
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <WarningIcon color="warning" sx={{ mr: 1, fontSize: 20 }} />
-                          <Typography variant="body2" color="text.secondary">
-                            {transaction.nextStep}
+            {stats.map((stat, index) => {
+              const IconComponent = stat.icon;
+              return (
+                <Grid item xs={12} sm={6} md={3} key={index}>
+                  <Card elevation={2}>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Box>
+                          <Typography color="text.secondary" gutterBottom variant="overline">
+                            {stat.title}
+                          </Typography>
+                          <Typography variant="h4" component="div" fontWeight="bold">
+                            {stat.value}
                           </Typography>
                         </Box>
-                      </Paper>
-                    ))}
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* Recent Activity & Quick Actions */}
-            <Grid item xs={12} lg={4}>
-              <Card elevation={2} sx={{ mb: 3 }}>
-                <CardContent>
-                  <Typography variant="h5" sx={{ mb: 1, fontWeight: 600 }}>
-                    Recent Activity
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    Latest updates on your transactions
-                  </Typography>
-
-                  <Box>
-                    {recentActivity.map((activity) => {
-                      const Icon = activity.icon;
-                      return (
-                        <Box key={activity.id} sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
-                          <Avatar sx={{ bgcolor: 'grey.100', mr: 2, width: 32, height: 32 }}>
-                            <Icon sx={{ fontSize: 16 }} />
-                          </Avatar>
-                          <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                            <Typography variant="body2" sx={{ mb: 0.5 }}>
-                              {activity.message}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {activity.time}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      );
-                    })}
-                  </Box>
-                </CardContent>
-              </Card>
-
-              <Card elevation={2}>
-                <CardContent>
-                  <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
-                    Quick Actions
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Button
-                      variant="outlined"
-                      startIcon={<AddIcon />}
-                      fullWidth
-                      sx={{ justifyContent: 'flex-start' }}
-                    >
-                      Upload Document
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      startIcon={<CalendarIcon />}
-                      fullWidth
-                      sx={{ justifyContent: 'flex-start' }}
-                    >
-                      Schedule Call
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      startIcon={<MessageIcon />}
-                      fullWidth
-                      sx={{ justifyContent: 'flex-start' }}
-                    >
-                      Send Message
-                    </Button>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
+                        <Avatar sx={{ bgcolor: `${stat.color}.main`, width: 56, height: 56 }}>
+                          <IconComponent />
+                        </Avatar>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              );
+            })}
           </Grid>
+
+          {/* Active Transactions */}
+          <Card elevation={2} sx={{ mb: 4 }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant="h5" component="h2" fontWeight="bold">
+                  Active Transactions
+                </Typography>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => navigate('/properties')}
+                >
+                  New Transaction
+                </Button>
+              </Box>
+              
+              <Grid container spacing={3}>
+                {transactions.map((transaction) => (
+                  <Grid item xs={12} md={6} lg={4} key={transaction.id}>
+                    <Paper elevation={1} sx={{ p: 3, height: '100%' }}>
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="h6" component="h3" gutterBottom>
+                          {transaction.property}
+                        </Typography>
+                        <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                          <Chip 
+                            label={transaction.type} 
+                            size="small" 
+                            color="primary" 
+                            variant="outlined"
+                          />
+                          <Chip 
+                            label={getStatusText(transaction.status)} 
+                            size="small" 
+                            color={getStatusColor(transaction.status)}
+                          />
+                        </Box>
+                      </Box>
+                      
+                      <Box sx={{ mb: 2 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                          <Typography variant="body2" color="text.secondary">
+                            Progress
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {transaction.progress}%
+                          </Typography>
+                        </Box>
+                        <LinearProgress 
+                          variant="determinate" 
+                          value={transaction.progress} 
+                          sx={{ height: 8, borderRadius: 4 }}
+                        />
+                      </Box>
+                      
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Attorney
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Avatar sx={{ width: 24, height: 24, fontSize: '0.75rem' }}>
+                            {transaction.attorney.split(' ').map(n => n[0]).join('')}
+                          </Avatar>
+                          <Typography variant="body2">
+                            {transaction.attorney}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      
+                      <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Next Step
+                        </Typography>
+                        <Typography variant="body2">
+                          {transaction.nextStep}
+                        </Typography>
+                      </Box>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card elevation={2}>
+            <CardContent>
+              <Typography variant="h5" component="h2" fontWeight="bold" gutterBottom>
+                Quick Actions
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    size="large"
+                    startIcon={<SearchIcon />}
+                    onClick={() => navigate('/properties')}
+                    sx={{ py: 2 }}
+                  >
+                    Search Properties
+                  </Button>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    size="large"
+                    startIcon={<GavelIcon />}
+                    onClick={() => navigate('/contracts')}
+                    sx={{ py: 2 }}
+                  >
+                    Generate Contract
+                  </Button>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    size="large"
+                    startIcon={<WarningIcon />}
+                    onClick={() => navigate('/attorneys')}
+                    sx={{ py: 2 }}
+                  >
+                    Find Attorney
+                  </Button>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    size="large"
+                    startIcon={<MoneyIcon />}
+                    onClick={() => navigate('/calculator')}
+                    sx={{ py: 2 }}
+                  >
+                    Cost Calculator
+                  </Button>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
         </Container>
       </Box>
     </Box>
   );
 }
+
+export default DashboardPage;
+
