@@ -24,7 +24,7 @@ import {
   Search as SearchIcon,
   AttachMoney as MoneyIcon,
   Security as SecurityIcon,
-  Flash as FlashIcon,
+  Bolt as FlashIcon,
   LocationOn as LocationIcon,
   ArrowForward as ArrowForwardIcon,
 } from '@mui/icons-material';
