@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { Avatar, AvatarFallback } from '../components/ui/avatar';
+import { Link } from 'react-router-dom';
 import { 
   Home, 
   FileText, 
@@ -17,7 +18,9 @@ import {
   CheckCircle,
   AlertCircle,
   DollarSign,
-  User
+  User,
+  Search,
+  Scale
 } from 'lucide-react';
 import '../App.css';
 
@@ -106,40 +109,40 @@ export function DashboardPage() {
           <nav className="flex-1 p-4">
             <ul className="space-y-2">
               <li>
-                <a href="#" className="flex items-center space-x-3 px-3 py-2 rounded-lg bg-primary/10 text-primary">
+                <Link to="/dashboard" className="flex items-center space-x-3 px-3 py-2 rounded-lg bg-primary/10 text-primary">
                   <Home className="w-5 h-5" />
                   <span>Dashboard</span>
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted">
+                <Link to="/properties" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted">
+                  <Search className="w-5 h-5" />
+                  <span>Property Search</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/contracts" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted">
                   <FileText className="w-5 h-5" />
-                  <span>My Transactions</span>
-                </a>
+                  <span>Contracts</span>
+                </Link>
               </li>
               <li>
-                <a href="#" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted">
+                <Link to="/documents" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted">
                   <FileText className="w-5 h-5" />
                   <span>Documents</span>
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted">
+                <Link to="/messages" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted">
                   <MessageSquare className="w-5 h-5" />
                   <span>Messages</span>
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted">
-                  <Calendar className="w-5 h-5" />
-                  <span>Calendar</span>
-                </a>
-              </li>
-              <li>
-                <a href="#" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted">
-                  <Settings className="w-5 h-5" />
-                  <span>Settings</span>
-                </a>
+                <Link to="/attorneys" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted">
+                  <Scale className="w-5 h-5" />
+                  <span>Attorneys</span>
+                </Link>
               </li>
             </ul>
           </nav>

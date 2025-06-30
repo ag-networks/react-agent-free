@@ -6,6 +6,11 @@ import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { PropertySearchPage } from './pages/PropertySearchPage';
+import { ContractGenerationPage } from './pages/ContractGenerationPage';
+import { DocumentManagementPage } from './pages/DocumentManagementPage';
+import { MessagingPage } from './pages/MessagingPage';
+import { AttorneyWorkflowPage } from './pages/AttorneyWorkflowPage';
 import './App.css';
 
 function App() {
@@ -39,6 +44,46 @@ function App() {
               element={
                 <ProtectedRoute>
                   <DashboardPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/properties" 
+              element={
+                <ProtectedRoute>
+                  <PropertySearchPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/contracts" 
+              element={
+                <ProtectedRoute>
+                  <ContractGenerationPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/documents" 
+              element={
+                <ProtectedRoute>
+                  <DocumentManagementPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/messages" 
+              element={
+                <ProtectedRoute>
+                  <MessagingPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/attorneys" 
+              element={
+                <ProtectedRoute>
+                  <AttorneyWorkflowPage />
                 </ProtectedRoute>
               } 
             />

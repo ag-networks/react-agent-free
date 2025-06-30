@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import {
   Box,
   Drawer,
@@ -28,24 +30,25 @@ import {
   Dashboard as DashboardIcon,
   Description as DescriptionIcon,
   Message as MessageIcon,
-  CalendarToday as CalendarIcon,
+  Event as CalendarIcon,
   Settings as SettingsIcon,
-  Notifications as NotificationsIcon,
-  Add as AddIcon,
-  AttachMoney as MoneyIcon,
-  AccessTime as TimeIcon,
-  CheckCircle as CheckCircleIcon,
-  Warning as WarningIcon,
-  Person as PersonIcon,
   ExitToApp as ExitIcon,
+  Notifications as NotificationsIcon,
+  Person as PersonIcon,
+  AttachMoney as MoneyIcon,
+  Schedule as ClockIcon,
+  CheckCircle as CheckIcon,
+  Search as SearchIcon,
+  Gavel as GavelIcon,
+  Add as AddIcon
 } from '@mui/icons-material';
-import { useAuth } from '../contexts/AuthContext';
 
 const drawerWidth = 240;
 
 export function DashboardPage() {
   const { user, logout } = useAuth();
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const transactions = [
     {
@@ -113,12 +116,12 @@ export function DashboardPage() {
   };
 
   const menuItems = [
-    { text: 'Dashboard', icon: DashboardIcon, index: 0 },
-    { text: 'My Transactions', icon: DescriptionIcon, index: 1 },
-    { text: 'Documents', icon: DescriptionIcon, index: 2 },
-    { text: 'Messages', icon: MessageIcon, index: 3 },
-    { text: 'Calendar', icon: CalendarIcon, index: 4 },
-    { text: 'Settings', icon: SettingsIcon, index: 5 },
+    { text: 'Dashboard', icon: DashboardIcon, path: '/dashboard' },
+    { text: 'Property Search', icon: SearchIcon, path: '/properties' },
+    { text: 'Contracts', icon: DescriptionIcon, path: '/contracts' },
+    { text: 'Documents', icon: DescriptionIcon, path: '/documents' },
+    { text: 'Messages', icon: MessageIcon, path: '/messages' },
+    { text: 'Attorneys', icon: GavelIcon, path: '/attorneys' },
   ];
 
   return (
@@ -149,14 +152,15 @@ export function DashboardPage() {
         <List sx={{ flexGrow: 1 }}>
           {menuItems.map((item) => {
             const Icon = item.icon;
+            const isSelected = location.pathname === item.path;
             return (
               <ListItem key={item.text} disablePadding>
                 <ListItemButton
-                  selected={selectedIndex === item.index}
-                  onClick={() => setSelectedIndex(item.index)}
+                  selected={isSelected}
+                  onClick={() => navigate(item.path)}
                 >
                   <ListItemIcon>
-                    <Icon color={selectedIndex === item.index ? 'primary' : 'inherit'} />
+                    <Icon color={isSelected ? 'primary' : 'inherit'} />
                   </ListItemIcon>
                   <ListItemText primary={item.text} />
                 </ListItemButton>
