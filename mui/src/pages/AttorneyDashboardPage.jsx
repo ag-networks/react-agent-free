@@ -337,8 +337,8 @@ const AttorneyDashboardPage = () => {
             </Box>
             
             <Grid container spacing={0.5} sx={{ mb: 2 }}>
-              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day) => (
-                <Grid item xs key={day}>
+              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => (
+                <Grid item xs key={`${day}-${index}`}>
                   <Typography variant="caption" color="text.secondary" align="center" display="block">
                     {day}
                   </Typography>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { attorneyService } from '../lib/api';
 import {
   Box,
   Typography,
@@ -9,453 +8,630 @@ import {
   Card,
   CardContent,
   Grid,
+  Chip,
+  Avatar,
+  IconButton,
   Tabs,
   Tab,
-  IconButton,
-  Chip,
+  Container,
+  AppBar,
+  Toolbar,
+  Badge,
   Paper,
+  Divider,
   List,
   ListItem,
-  ListItemIcon,
   ListItemText,
-  Divider
+  ListItemIcon
 } from '@mui/material';
 import {
-  ArrowBack as ArrowBackIcon,
+  Scale as ScaleIcon,
   Message as MessageIcon,
   VideoCall as VideoCallIcon,
-  ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon,
-  Add as AddIcon,
+  Event as CalendarIcon,
+  Description as FileTextIcon,
   Schedule as ClockIcon,
   CheckCircle as CheckCircleIcon,
-  Description as FileTextIcon,
-  CalendarToday as CalendarIcon
+  Warning as AlertCircleIcon,
+  Add as PlusIcon,
+  ChevronRight as ChevronRightIcon,
+  ChevronLeft as ChevronLeftIcon,
+  Person as UserIcon,
+  Business as BuildingIcon,
+  Phone as PhoneIcon,
+  Email as MailIcon,
+  LocationOn as MapPinIcon,
+  AttachMoney as DollarSignIcon,
+  Assignment as TaskIcon,
+  Contacts as ContactsIcon,
+  Folder as DocumentsIcon,
+  Dashboard as DashboardIcon,
+  Group as ConsultationsIcon,
+  Home as HomeIcon,
+  Settings as SettingsIcon,
+  Logout as LogoutIcon
 } from '@mui/icons-material';
+import { AttorneyService } from '../lib/api';
 
-export function AttorneyWorkflowPage() {
+const AttorneyWorkflowPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [activeTab, setActiveTab] = useState(0);
+  const { user, signOut } = useAuth();
+  const [currentTab, setCurrentTab] = useState(0);
+  const [consultations, setConsultations] = useState([]);
+  const [contractReviews, setContractReviews] = useState([]);
+  const [calendarEvents, setCalendarEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data matching the design
-  const pendingConsultations = [
-    {
-      id: 1,
-      name: 'Michelle Lee',
-      address: '3111.7 Frencq, TA Argelle, CA',
-      status: 'Under Contract',
-      stage: 'Pretice',
-      action: 'Approve'
-    },
-    {
-      id: 2,
-      name: 'Robert Chen',
-      address: '201.500 Durf Lateain, TX',
-      status: 'Per approval',
-      stage: 'fintaice',
-      action: 'Review'
+  useEffect(() => {
+    const loadWorkflowData = async () => {
+      try {
+        const attorneyService = new AttorneyService();
+        
+        // Mock data matching the design
+        const mockConsultations = [
+          {
+            id: '1',
+            clientName: 'Michelle Lee',
+            address: '123 Oak Street, San Francisco, CA',
+            status: 'pending',
+            priority: 'high',
+            type: 'Purchase Agreement Review',
+            action: 'Schedule Call',
+            actionType: 'call',
+            avatar: 'ML'
+          },
+          {
+            id: '2',
+            clientName: 'Robert Chen',
+            address: '456 Pine Avenue, Oakland, CA',
+            status: 'approved',
+            priority: 'medium',
+            type: 'Contract Negotiation',
+            action: 'Review Terms',
+            actionType: 'review',
+            avatar: 'RC'
+          },
+          {
+            id: '3',
+            clientName: 'Jennifer Walsh',
+            address: '789 Elm Drive, Berkeley, CA',
+            status: 'urgent',
+            priority: 'urgent',
+            type: 'Title Issue Resolution',
+            action: 'Emergency Review',
+            actionType: 'emergency',
+            avatar: 'JW'
+          }
+        ];
+
+        const mockContractReviews = [
+          {
+            id: '1',
+            title: 'Purchase Agreement - 123 Oak Street',
+            client: 'Michelle Lee',
+            status: 'pending',
+            priority: 'high',
+            dueDate: '2024-04-15',
+            type: 'purchase'
+          },
+          {
+            id: '2',
+            title: 'Lease Agreement - 456 Pine Avenue',
+            client: 'Robert Chen',
+            status: 'in_review',
+            priority: 'medium',
+            dueDate: '2024-04-18',
+            type: 'lease'
+          }
+        ];
+
+        const mockCalendarEvents = [
+          {
+            id: '1',
+            title: 'Clients Completion',
+            date: 11,
+            type: 'completion'
+          },
+          {
+            id: '2',
+            title: 'Offering Question',
+            date: 15,
+            type: 'question'
+          }
+        ];
+
+        setConsultations(mockConsultations);
+        setContractReviews(mockContractReviews);
+        setCalendarEvents(mockCalendarEvents);
+      } catch (error) {
+        console.error('Error loading workflow data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadWorkflowData();
+  }, []);
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'approved': return 'success';
+      case 'pending': return 'warning';
+      case 'urgent': return 'error';
+      case 'in_review': return 'info';
+      default: return 'default';
     }
-  ];
-
-  const contractReviews = [
-    {
-      id: 1,
-      name: 'Daniel Martinez',
-      address: '2018.1Htrm JU. Ireican, TI',
-      status: 'Caving',
-      stage: 'Pitgei',
-      action: 'Checkilld'
-    },
-    {
-      id: 2,
-      name: 'Sarah Green',
-      address: '13.8991 5irb Evervea, CO',
-      status: 'Featuig',
-      stage: 'Rotaioia',
-      action: 'Approv'
-    }
-  ];
-
-  const legalTasks = [
-    {
-      id: 1,
-      task: 'Conduct legal review',
-      date: 'Apr 24',
-      status: 'pending'
-    },
-    {
-      id: 2,
-      task: 'Obtain client approval',
-      date: 'Apr 25',
-      status: 'completed'
-    }
-  ];
-
-  const documentTemplates = [
-    { name: 'Contact', status: '--' },
-    { name: 'Amendment', status: '--' },
-    { name: 'Agreement', status: '--' },
-    { name: 'Addendum', status: '--' },
-    { name: 'Bill of Sails', status: '--' }
-  ];
-
-  const calendarEvents = [
-    { date: 11, event: 'Cillets Complrtion' },
-    { date: 15, event: 'Difering Quemion' }
-  ];
-
-  const tabs = ['Dashboards', 'Contitutions', 'Contacts', 'Documents', 'Documents', 'Tasks'];
-
-  const formatMonth = (date) => {
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
 
-  const getDaysInMonth = (date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
-
-    const days = [];
-    
-    // Add empty cells for days before the first day of the month
-    for (let i = 0; i < startingDayOfWeek; i++) {
-      days.push(null);
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'approved': return <CheckCircleIcon sx={{ fontSize: 16 }} />;
+      case 'pending': return <ClockIcon sx={{ fontSize: 16 }} />;
+      case 'urgent': return <AlertCircleIcon sx={{ fontSize: 16 }} />;
+      default: return <FileTextIcon sx={{ fontSize: 16 }} />;
     }
-    
-    // Add all days of the month
-    for (let day = 1; day <= daysInMonth; day++) {
-      days.push(day);
-    }
-    
-    return days;
   };
 
-  const navigateMonth = (direction) => {
-    setCurrentDate(prev => {
-      const newDate = new Date(prev);
-      newDate.setMonth(prev.getMonth() + direction);
-      return newDate;
-    });
+  const getActionButtonColor = (actionType) => {
+    switch (actionType) {
+      case 'call': return 'primary';
+      case 'review': return 'info';
+      case 'emergency': return 'error';
+      default: return 'primary';
+    }
   };
+
+  const handleTabChange = (event, newValue) => {
+    setCurrentTab(newValue);
+  };
+
+  const TabPanel = ({ children, value, index }) => (
+    <div hidden={value !== index}>
+      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
+    </div>
+  );
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50' }}>
-      {/* Header */}
-      <Paper elevation={1} sx={{ borderRadius: 0 }}>
-        <Box sx={{ px: 3, py: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Box sx={{ 
-                  width: 32, 
-                  height: 32, 
-                  bgcolor: 'primary.main', 
-                  borderRadius: 1, 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center' 
-                }}>
-                  <Typography sx={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
-                    ⚖
-                  </Typography>
-                </Box>
-                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                  <Box component="span" sx={{ color: 'primary.main' }}>Agent</Box>
-                  <Box component="span" sx={{ color: 'text.primary' }}>Workflow</Box>
-                </Typography>
-              </Box>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'grey.50' }}>
+      {/* Sidebar */}
+      <Box sx={{ width: 280, bgcolor: 'primary.dark', color: 'white', display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <ScaleIcon sx={{ fontSize: 32 }} />
+            <Typography variant="h5" fontWeight="bold">
+              Agent Free
+            </Typography>
+          </Box>
+        </Box>
+
+        <Box sx={{ flex: 1, px: 2 }}>
+          <List>
+            <ListItem button component={Link} to="/dashboard" sx={{ borderRadius: 2, mb: 1 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                <HomeIcon />
+              </ListItemIcon>
+              <ListItemText primary="Dashboard" />
+            </ListItem>
+            <ListItem button component={Link} to="/properties" sx={{ borderRadius: 2, mb: 1 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                <BuildingIcon />
+              </ListItemIcon>
+              <ListItemText primary="My Transactions" />
+            </ListItem>
+            <ListItem button component={Link} to="/documents" sx={{ borderRadius: 2, mb: 1 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                <FileTextIcon />
+              </ListItemIcon>
+              <ListItemText primary="Documents" />
+            </ListItem>
+            <ListItem button component={Link} to="/messages" sx={{ borderRadius: 2, mb: 1 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                <MessageIcon />
+              </ListItemIcon>
+              <ListItemText primary="Messages" />
+            </ListItem>
+            <ListItem button component={Link} to="/attorney-dashboard" sx={{ borderRadius: 2, mb: 1 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                <DashboardIcon />
+              </ListItemIcon>
+              <ListItemText primary="Attorney Dashboard" />
+            </ListItem>
+            <ListItem button component={Link} to="/attorney-clients" sx={{ borderRadius: 2, mb: 1 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                <ContactsIcon />
+              </ListItemIcon>
+              <ListItemText primary="Client Management" />
+            </ListItem>
+            <ListItem button component={Link} to="/attorney-calendar" sx={{ borderRadius: 2, mb: 1 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                <CalendarIcon />
+              </ListItemIcon>
+              <ListItemText primary="Calendar" />
+            </ListItem>
+            <ListItem 
+              button 
+              sx={{ 
+                borderRadius: 2, 
+                mb: 1, 
+                bgcolor: 'primary.main',
+                '&:hover': { bgcolor: 'primary.light' }
+              }}
+            >
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                <ConsultationsIcon />
+              </ListItemIcon>
+              <ListItemText primary="Agent Workflow" />
+            </ListItem>
+            <ListItem button component={Link} to="/settings" sx={{ borderRadius: 2, mb: 1 }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                <SettingsIcon />
+              </ListItemIcon>
+              <ListItemText primary="Settings" />
+            </ListItem>
+          </List>
+        </Box>
+
+        <Box sx={{ p: 2, borderTop: 1, borderColor: 'primary.light' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+            <Avatar sx={{ bgcolor: 'primary.main' }}>
+              {user?.name?.charAt(0) || 'A'}
+            </Avatar>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant="body2" fontWeight="medium" noWrap>
+                {user?.name || 'Attorney'}
+              </Typography>
+              <Typography variant="caption" color="primary.light" noWrap>
+                {user?.email || 'attorney@agentfree.com'}
+              </Typography>
             </Box>
-            
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          </Box>
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            startIcon={<LogoutIcon />}
+            onClick={signOut}
+            sx={{ bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.light' } }}
+          >
+            Sign Out
+          </Button>
+        </Box>
+      </Box>
+
+      {/* Main Content */}
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* Header */}
+        <AppBar position="static" color="transparent" elevation={0} sx={{ bgcolor: 'white', borderBottom: 1, borderColor: 'grey.200' }}>
+          <Toolbar sx={{ justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <ScaleIcon sx={{ color: 'primary.main', fontSize: 28 }} />
+              <Typography variant="h5" fontWeight="bold" color="text.primary">
+                Agent Workflow
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 2 }}>
               <Button
                 variant="outlined"
                 startIcon={<MessageIcon />}
-                sx={{ textTransform: 'none' }}
+                sx={{ borderRadius: 2 }}
               >
                 Message
               </Button>
               <Button
                 variant="contained"
                 startIcon={<VideoCallIcon />}
-                sx={{ textTransform: 'none' }}
+                sx={{ borderRadius: 2 }}
               >
                 Start Video Call
               </Button>
             </Box>
-          </Box>
-        </Box>
-      </Paper>
+          </Toolbar>
+        </AppBar>
 
-      {/* Navigation Tabs */}
-      <Paper elevation={1} sx={{ borderRadius: 0 }}>
-        <Box sx={{ px: 3 }}>
-          <Tabs 
-            value={activeTab} 
-            onChange={(e, newValue) => setActiveTab(newValue)}
-            sx={{ borderBottom: 1, borderColor: 'divider' }}
-          >
-            {tabs.map((tab, index) => (
-              <Tab 
-                key={tab} 
-                label={tab} 
-                sx={{ textTransform: 'none', fontWeight: 500 }}
-              />
-            ))}
-          </Tabs>
-        </Box>
-      </Paper>
+        <Container maxWidth="xl" sx={{ flex: 1, py: 3 }}>
+          <Grid container spacing={3}>
+            {/* Main Content Area */}
+            <Grid item xs={12} lg={9}>
+              {/* Tab Navigation */}
+              <Paper sx={{ mb: 3 }}>
+                <Tabs
+                  value={currentTab}
+                  onChange={handleTabChange}
+                  variant="scrollable"
+                  scrollButtons="auto"
+                  sx={{ borderBottom: 1, borderColor: 'divider' }}
+                >
+                  <Tab label="Dashboards" icon={<DashboardIcon />} iconPosition="start" />
+                  <Tab label="Consultations" icon={<ConsultationsIcon />} iconPosition="start" />
+                  <Tab label="Contacts" icon={<ContactsIcon />} iconPosition="start" />
+                  <Tab label="Documents" icon={<DocumentsIcon />} iconPosition="start" />
+                  <Tab label="Tasks" icon={<TaskIcon />} iconPosition="start" />
+                </Tabs>
+              </Paper>
 
-      <Box sx={{ p: 3 }}>
-        <Grid container spacing={3}>
-          {/* Left Column - 2/3 width */}
-          <Grid item xs={12} lg={8}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              {/* Pending Client Consultations */}
-              <Card elevation={1}>
-                <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                      Pending Client Consultations
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        sx={{ textTransform: 'none' }}
-                      >
-                        Deteutinge
-                      </Button>
-                      <IconButton size="small" sx={{ border: 1, borderColor: 'grey.300' }}>
-                        <AddIcon />
-                      </IconButton>
-                    </Box>
+              {/* Tab Content */}
+              <TabPanel value={currentTab} index={0}>
+                {/* Dashboards Content */}
+                <Typography variant="h6" gutterBottom>
+                  Dashboard Overview
+                </Typography>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <Card>
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                          Active Cases
+                        </Typography>
+                        <Typography variant="h3" color="primary">
+                          12
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Card>
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                          Pending Reviews
+                        </Typography>
+                        <Typography variant="h3" color="warning.main">
+                          5
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                </Grid>
+              </TabPanel>
+
+              <TabPanel value={currentTab} index={1}>
+                {/* Pending Client Consultations */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                  <Typography variant="h5" fontWeight="bold">
+                    Pending Client Consultations
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      sx={{ borderRadius: 2 }}
+                    >
+                      Deuteunge
+                    </Button>
+                    <IconButton>
+                      <PlusIcon />
+                    </IconButton>
                   </Box>
                 </Box>
-                
-                <CardContent>
-                  <Grid container spacing={2}>
-                    {pendingConsultations.map((consultation) => (
-                      <Grid item xs={12} md={6} key={consultation.id}>
-                        <Paper variant="outlined" sx={{ p: 2 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                              {consultation.name}
-                            </Typography>
-                            <ChevronRightIcon sx={{ color: 'grey.400' }} />
-                          </Box>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                            {consultation.address}
-                          </Typography>
-                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Box>
-                              <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>
-                                {consultation.status}
-                              </Typography>
-                              <Chip 
-                                label={consultation.stage} 
-                                size="small" 
-                                sx={{ bgcolor: 'warning.light', color: 'warning.dark' }}
-                              />
+
+                <Grid container spacing={3}>
+                  {consultations.map((consultation) => (
+                    <Grid item xs={12} md={4} key={consultation.id}>
+                      <Card sx={{ height: '100%', '&:hover': { boxShadow: 4 } }}>
+                        <CardContent>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                              <Avatar sx={{ bgcolor: 'primary.main' }}>
+                                {consultation.avatar}
+                              </Avatar>
+                              <Box>
+                                <Typography variant="h6" fontWeight="bold">
+                                  {consultation.clientName}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                  {consultation.address}
+                                </Typography>
+                              </Box>
                             </Box>
-                            <Button
-                              variant="outlined"
-                              size="small"
-                              sx={{ textTransform: 'none' }}
-                            >
-                              {consultation.action}
-                            </Button>
+                            <ChevronRightIcon color="action" />
                           </Box>
-                        </Paper>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </CardContent>
-              </Card>
 
-              {/* Contract Reviews */}
-              <Card elevation={1}>
-                <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider' }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    Contract Reviews
-                  </Typography>
-                </Box>
-                
-                <CardContent>
-                  <Grid container spacing={2}>
-                    {contractReviews.map((review) => (
-                      <Grid item xs={12} md={6} key={review.id}>
-                        <Paper variant="outlined" sx={{ p: 2 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                              {review.name}
-                            </Typography>
-                            <ChevronRightIcon sx={{ color: 'grey.400' }} />
+                          <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                            <Chip
+                              icon={getStatusIcon(consultation.status)}
+                              label={consultation.status}
+                              color={getStatusColor(consultation.status)}
+                              size="small"
+                            />
+                            <Chip
+                              label={consultation.priority}
+                              color={getStatusColor(consultation.priority)}
+                              size="small"
+                            />
                           </Box>
+
                           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                            {review.address}
+                            {consultation.type}
                           </Typography>
-                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+
+                          <Button
+                            variant="contained"
+                            color={getActionButtonColor(consultation.actionType)}
+                            size="small"
+                            sx={{ borderRadius: 2 }}
+                          >
+                            {consultation.action}
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+
+                {/* Contract Reviews Section */}
+                <Typography variant="h5" fontWeight="bold" sx={{ mt: 4, mb: 3 }}>
+                  Contract Reviews
+                </Typography>
+
+                <Grid container spacing={3}>
+                  {contractReviews.map((review) => (
+                    <Grid item xs={12} md={6} key={review.id}>
+                      <Card sx={{ '&:hover': { boxShadow: 4 } }}>
+                        <CardContent>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                             <Box>
-                              <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>
-                                {review.status}
+                              <Typography variant="h6" fontWeight="bold">
+                                {review.title}
                               </Typography>
-                              <Chip 
-                                label={review.stage} 
-                                size="small" 
-                                sx={{ bgcolor: 'error.light', color: 'error.dark' }}
-                              />
+                              <Typography variant="body2" color="text.secondary">
+                                Client: {review.client}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                Due: {review.dueDate}
+                              </Typography>
                             </Box>
-                            <Button
-                              variant="outlined"
+                            <ChevronRightIcon color="action" />
+                          </Box>
+
+                          <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                            <Chip
+                              icon={getStatusIcon(review.status)}
+                              label={review.status.replace('_', ' ')}
+                              color={getStatusColor(review.status)}
                               size="small"
-                              sx={{ textTransform: 'none' }}
-                            >
-                              {review.action}
-                            </Button>
+                            />
+                            <Chip
+                              label={review.priority}
+                              color={getStatusColor(review.priority)}
+                              size="small"
+                            />
                           </Box>
-                        </Paper>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </CardContent>
-              </Card>
 
-              {/* Legal Tasks */}
-              <Card elevation={1}>
-                <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider' }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    Legal Tasks
-                  </Typography>
-                </Box>
-                
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            sx={{ borderRadius: 2 }}
+                          >
+                            Review Contract
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              </TabPanel>
+
+              <TabPanel value={currentTab} index={2}>
+                <Typography variant="h6" gutterBottom>
+                  Contacts Management
+                </Typography>
+                <Typography color="text.secondary">
+                  Contact management features will be displayed here.
+                </Typography>
+              </TabPanel>
+
+              <TabPanel value={currentTab} index={3}>
+                <Typography variant="h6" gutterBottom>
+                  Document Management
+                </Typography>
+                <Typography color="text.secondary">
+                  Document management features will be displayed here.
+                </Typography>
+              </TabPanel>
+
+              <TabPanel value={currentTab} index={4}>
+                <Typography variant="h6" gutterBottom>
+                  Task Management
+                </Typography>
+                <Typography color="text.secondary">
+                  Task management features will be displayed here.
+                </Typography>
+              </TabPanel>
+            </Grid>
+
+            {/* Right Sidebar - Calendar */}
+            <Grid item xs={12} lg={3}>
+              <Card>
                 <CardContent>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {legalTasks.map((task) => (
-                      <Paper key={task.id} variant="outlined" sx={{ p: 2 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            {task.status === 'completed' ? (
-                              <CheckCircleIcon sx={{ color: 'primary.main' }} />
-                            ) : (
-                              <ClockIcon sx={{ color: 'grey.400' }} />
-                            )}
-                            <Typography sx={{ fontWeight: 500 }}>{task.task}</Typography>
-                          </Box>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Typography variant="body2" color="text.secondary">
-                              {task.date}
-                            </Typography>
-                            <IconButton size="small" sx={{ border: 1, borderColor: 'grey.300' }}>
-                              <AddIcon />
-                            </IconButton>
-                          </Box>
-                        </Box>
-                      </Paper>
-                    ))}
-                  </Box>
-                </CardContent>
-              </Card>
-            </Box>
-          </Grid>
-
-          {/* Right Column - 1/3 width */}
-          <Grid item xs={12} lg={4}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              {/* Calendar */}
-              <Card elevation={1}>
-                <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                      {formatMonth(currentDate)}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                    <Typography variant="h6" fontWeight="bold">
+                      April 2024
                     </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <IconButton 
-                        size="small"
-                        onClick={() => navigateMonth(-1)}
-                      >
+                    <Box>
+                      <IconButton size="small">
                         <ChevronLeftIcon />
                       </IconButton>
-                      <IconButton 
-                        size="small"
-                        onClick={() => navigateMonth(1)}
-                      >
+                      <IconButton size="small">
                         <ChevronRightIcon />
                       </IconButton>
                     </Box>
                   </Box>
-                </Box>
-                
-                <CardContent sx={{ p: 2 }}>
-                  <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0.5, mb: 1 }}>
-                    {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day) => (
-                      <Box key={day} sx={{ textAlign: 'center', py: 1 }}>
-                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+
+                  {/* Days of Week */}
+                  <Grid container spacing={0.5} sx={{ mb: 1 }}>
+                    {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => (
+                      <Grid item xs key={`${day}-${index}`}>
+                        <Typography variant="caption" color="text.secondary" align="center" display="block">
                           {day}
                         </Typography>
-                      </Box>
+                      </Grid>
                     ))}
-                  </Box>
-                  
-                  <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0.5 }}>
-                    {getDaysInMonth(currentDate).map((day, index) => (
-                      <Box key={index} sx={{ aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {day && (
-                          <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                            <Typography variant="body2" sx={{ fontWeight: day === 11 || day === 15 ? 600 : 400 }}>
+                  </Grid>
+
+                  {/* Calendar Days */}
+                  <Grid container spacing={0.5}>
+                    {Array.from({ length: 30 }, (_, i) => i + 1).map((day) => {
+                      const hasEvent = calendarEvents.some(event => event.date === day);
+                      const isHighlighted = day === 11 || day === 15;
+                      
+                      return (
+                        <Grid item xs key={day}>
+                          <Box
+                            sx={{
+                              p: 1,
+                              textAlign: 'center',
+                              borderRadius: 1,
+                              cursor: 'pointer',
+                              bgcolor: isHighlighted ? 'primary.main' : 'transparent',
+                              color: isHighlighted ? 'white' : 'text.primary',
+                              '&:hover': { bgcolor: isHighlighted ? 'primary.dark' : 'grey.100' },
+                              position: 'relative'
+                            }}
+                          >
+                            <Typography variant="body2">
                               {day}
                             </Typography>
-                            {calendarEvents.find(event => event.date === day) && (
-                              <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
-                                <Typography variant="caption" sx={{ color: 'primary.main', fontSize: '10px' }}>
-                                  {calendarEvents.find(event => event.date === day)?.event}
-                                </Typography>
-                              </Box>
+                            {hasEvent && (
+                              <Box
+                                sx={{
+                                  position: 'absolute',
+                                  bottom: 2,
+                                  left: '50%',
+                                  transform: 'translateX(-50%)',
+                                  width: 4,
+                                  height: 4,
+                                  borderRadius: '50%',
+                                  bgcolor: isHighlighted ? 'white' : 'primary.main'
+                                }}
+                              />
                             )}
                           </Box>
-                        )}
-                      </Box>
-                    ))}
-                  </Box>
-                </CardContent>
-              </Card>
+                        </Grid>
+                      );
+                    })}
+                  </Grid>
 
-              {/* Legal Document Templates */}
-              <Card elevation={1}>
-                <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                    Legal Document Templates
+                  <Divider sx={{ my: 2 }} />
+
+                  {/* Calendar Events */}
+                  <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>
+                    Upcoming Events
                   </Typography>
-                </Box>
-                
-                <CardContent sx={{ p: 2 }}>
-                  <List dense>
-                    {documentTemplates.map((template, index) => (
-                      <ListItem key={index} sx={{ px: 0 }}>
-                        <ListItemIcon sx={{ minWidth: 32 }}>
-                          <FileTextIcon sx={{ color: 'primary.main', fontSize: 20 }} />
-                        </ListItemIcon>
-                        <ListItemText 
-                          primary={template.name}
-                          primaryTypographyProps={{ variant: 'body2' }}
-                        />
-                        <Typography variant="body2" color="text.secondary">
-                          {template.status}
-                        </Typography>
-                      </ListItem>
-                    ))}
-                  </List>
+                  {calendarEvents.map((event) => (
+                    <Box key={event.id} sx={{ mb: 1 }}>
+                      <Typography variant="body2" color="primary.main" fontWeight="medium">
+                        {event.date} {event.title}
+                      </Typography>
+                    </Box>
+                  ))}
                 </CardContent>
               </Card>
-            </Box>
+            </Grid>
           </Grid>
-        </Grid>
+        </Container>
       </Box>
     </Box>
   );
-}
+};
+
+export default AttorneyWorkflowPage;
 

@@ -84,6 +84,14 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="/attorney-workflow" 
+              element={
+                <ProtectedRoute>
+                  <AttorneyWorkflowPage />
+                </ProtectedRoute>
+              } 
+            />
 
             {/* Attorney Routes */}
             <Route 
