@@ -1,420 +1,372 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
+import { useAuth } from '../contexts/AuthContext';
+import { attorneyService } from '../lib/api';
 import { 
-  Scale, 
-  User, 
-  Calendar,
+  ArrowLeft, 
+  MessageSquare, 
+  Video, 
+  ChevronLeft, 
+  ChevronRight,
+  Plus,
   Clock,
-  CheckCircle,
-  AlertCircle,
+  CheckCircle2,
   FileText,
-  MessageSquare,
-  Phone,
-  Video,
-  Star,
-  Award,
-  Briefcase,
-  Users,
-  TrendingUp,
-  DollarSign,
-  Home
+  Calendar,
+  ChevronRight as ChevronRightIcon
 } from 'lucide-react';
-import { attorneyService, transactionService } from '@/lib/api';
-import '../App.css';
 
 export function AttorneyWorkflowPage() {
   const navigate = useNavigate();
-  const [attorneys, setAttorneys] = useState([]);
-  const [transactions, setTransactions] = useState([]);
-  const [selectedAttorney, setSelectedAttorney] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [activeTab, setActiveTab] = useState('Dashboards');
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [attorneyResponse, transactionResponse] = await Promise.all([
-        attorneyService.getAttorneys(),
-        transactionService.getTransactions()
-      ]);
-      
-      setAttorneys(attorneyResponse.attorneys);
-      setTransactions(transactionResponse.transactions);
-      
-      if (attorneyResponse.attorneys.length > 0) {
-        setSelectedAttorney(attorneyResponse.attorneys[0]);
-      }
-    } catch (error) {
-      console.error('Error loading data:', error);
-    } finally {
-      setLoading(false);
+  // Mock data matching the design
+  const pendingConsultations = [
+    {
+      id: 1,
+      name: 'Michelle Lee',
+      address: '3111.7 Frencq, TA Argelle, CA',
+      status: 'Under Contract',
+      stage: 'Pretice',
+      action: 'Approve'
+    },
+    {
+      id: 2,
+      name: 'Robert Chen',
+      address: '201.500 Durf Lateain, TX',
+      status: 'Per approval',
+      stage: 'fintaice',
+      action: 'Review'
     }
-  };
+  ];
 
-  const handleScheduleConsultation = async (attorneyId) => {
-    try {
-      const datetime = new Date();
-      datetime.setDate(datetime.getDate() + 7); // Schedule for next week
-      await attorneyService.scheduleConsultation(attorneyId, datetime.toISOString());
-      alert('Consultation scheduled successfully!');
-    } catch (error) {
-      console.error('Error scheduling consultation:', error);
+  const contractReviews = [
+    {
+      id: 1,
+      name: 'Daniel Martinez',
+      address: '2018.1Htrm JU. Ireican, TI',
+      status: 'Caving',
+      stage: 'Pitgei',
+      action: 'Checkilld'
+    },
+    {
+      id: 2,
+      name: 'Sarah Green',
+      address: '13.8991 5irb Evervea, CO',
+      status: 'Featuig',
+      stage: 'Rotaioia',
+      action: 'Approv'
     }
-  };
+  ];
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Under Contract':
-        return 'bg-blue-100 text-blue-800';
-      case 'Closed':
-        return 'bg-green-100 text-green-800';
-      case 'Pending':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+  const legalTasks = [
+    {
+      id: 1,
+      task: 'Conduct legal review',
+      date: 'Apr 24',
+      status: 'pending'
+    },
+    {
+      id: 2,
+      task: 'Obtain client approval',
+      date: 'Apr 25',
+      status: 'completed'
     }
+  ];
+
+  const documentTemplates = [
+    { name: 'Contact', status: '--' },
+    { name: 'Amendment', status: '--' },
+    { name: 'Agreement', status: '--' },
+    { name: 'Addendum', status: '--' },
+    { name: 'Bill of Sails', status: '--' }
+  ];
+
+  const calendarEvents = [
+    { date: 11, event: 'Cillets Complrtion' },
+    { date: 15, event: 'Difering Quemion' }
+  ];
+
+  const tabs = ['Dashboards', 'Contitutions', 'Contacts', 'Documents', 'Documents', 'Tasks'];
+
+  const formatMonth = (date) => {
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
 
-  const getProgressColor = (progress) => {
-    if (progress >= 75) return 'bg-green-500';
-    if (progress >= 50) return 'bg-blue-500';
-    if (progress >= 25) return 'bg-yellow-500';
-    return 'bg-gray-500';
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+
+    const days = [];
+    
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(null);
+    }
+    
+    // Add all days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push(day);
+    }
+    
+    return days;
   };
 
-  const calculateTransactionProgress = (transaction) => {
-    const steps = ['contract', 'inspection', 'financing', 'closing'];
-    const completedSteps = steps.filter(step => transaction.progress[step] === 'completed').length;
-    return (completedSteps / steps.length) * 100;
+  const navigateMonth = (direction) => {
+    setCurrentDate(prev => {
+      const newDate = new Date(prev);
+      newDate.setMonth(prev.getMonth() + direction);
+      return newDate;
+    });
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="space-y-4">
-                <div className="h-64 bg-gray-200 rounded"></div>
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
+                <div className="text-white text-sm font-bold">⚖</div>
               </div>
-              <div className="lg:col-span-2 space-y-4">
-                <div className="h-96 bg-gray-200 rounded"></div>
-              </div>
+              <h1 className="text-2xl font-bold">
+                <span className="text-blue-600">Agent</span>
+                <span className="text-black">Workflow</span>
+              </h1>
             </div>
+          </div>
+          
+          <div className="flex items-center space-x-3">
+            <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              <MessageSquare className="w-4 h-4" />
+              <span>Message</span>
+            </button>
+            <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              <Video className="w-4 h-4" />
+              <span>Start Video Call</span>
+            </button>
           </div>
         </div>
       </div>
-    );
-  }
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Attorney Workflow</h1>
-            <p className="text-gray-600 mt-2">Professional legal support and consultation</p>
-          </div>
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/dashboard')}
-          >
-            Back to Dashboard
-          </Button>
+      {/* Navigation Tabs */}
+      <div className="bg-white border-b border-gray-200 px-6">
+        <div className="flex space-x-8">
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === tab
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Attorney List */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Scale className="h-5 w-5" />
-                  Available Attorneys
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {attorneys.map((attorney) => (
-                  <Card 
-                    key={attorney.id}
-                    className={`cursor-pointer transition-all hover:shadow-md ${
-                      selectedAttorney?.id === attorney.id 
-                        ? 'ring-2 ring-blue-500 bg-blue-50' 
-                        : 'hover:bg-gray-50'
-                    }`}
-                    onClick={() => setSelectedAttorney(attorney)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <Avatar className="h-12 w-12">
-                          <AvatarImage src={attorney.avatar} />
-                          <AvatarFallback>
-                            {attorney.name.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        </Avatar>
-                        
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900">{attorney.name}</h3>
-                          <div className="flex items-center gap-1 mt-1">
-                            <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                            <span className="text-sm font-medium">{attorney.rating}</span>
-                            <span className="text-sm text-gray-500">• {attorney.experience}</span>
-                          </div>
-                          
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {attorney.specialties.slice(0, 2).map((specialty, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs">
-                                {specialty}
-                              </Badge>
-                            ))}
-                          </div>
-                          
-                          <div className="flex items-center justify-between mt-3">
-                            <div className="text-sm text-gray-600">
-                              <span className="font-medium">{attorney.activeTransactions}</span> active
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              <span className="font-medium">{attorney.completedTransactions}</span> completed
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Attorney Details & Workflow */}
-          <div className="lg:col-span-2 space-y-6">
-            {selectedAttorney ? (
-              <>
-                {/* Attorney Profile */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <User className="h-5 w-5" />
-                      Attorney Profile
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-start gap-4">
-                      <Avatar className="h-20 w-20">
-                        <AvatarImage src={selectedAttorney.avatar} />
-                        <AvatarFallback className="text-lg">
-                          {selectedAttorney.name.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      
-                      <div className="flex-1">
-                        <h2 className="text-2xl font-bold text-gray-900">{selectedAttorney.name}</h2>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                            <span className="font-medium">{selectedAttorney.rating}</span>
-                          </div>
-                          <span className="text-gray-500">•</span>
-                          <span className="text-gray-600">{selectedAttorney.experience} experience</span>
-                        </div>
-                        
-                        <p className="text-gray-600 mt-2">{selectedAttorney.bio}</p>
-                        
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          {selectedAttorney.specialties.map((specialty, index) => (
-                            <Badge key={index} variant="outline">
-                              {specialty}
-                            </Badge>
-                          ))}
-                        </div>
-                        
-                        <div className="flex gap-3 mt-4">
-                          <Button 
-                            onClick={() => handleScheduleConsultation(selectedAttorney.id)}
-                            className="flex items-center gap-2"
-                          >
-                            <Calendar className="h-4 w-4" />
-                            Schedule Consultation
-                          </Button>
-                          <Button variant="outline" className="flex items-center gap-2">
-                            <MessageSquare className="h-4 w-4" />
-                            Send Message
-                          </Button>
-                          <Button variant="outline" className="flex items-center gap-2">
-                            <Phone className="h-4 w-4" />
-                            Call
-                          </Button>
-                        </div>
-                      </div>
+      <div className="flex">
+        {/* Main Content */}
+        <div className="flex-1 p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column - 2/3 width */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Pending Client Consultations */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold">Pending Client Consultations</h2>
+                    <div className="flex items-center space-x-2">
+                      <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">
+                        Deteutinge
+                      </button>
+                      <button className="w-8 h-8 border border-gray-300 rounded flex items-center justify-center hover:bg-gray-50">
+                        <Plus className="w-4 h-4" />
+                      </button>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
+                
+                <div className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {pendingConsultations.map((consultation) => (
+                      <div key={consultation.id} className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="font-semibold">{consultation.name}</h3>
+                          <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+                        </div>
+                        <p className="text-sm text-gray-600 mb-3">{consultation.address}</p>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium">{consultation.status}</p>
+                            <span className="inline-block px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">
+                              {consultation.stage}
+                            </span>
+                          </div>
+                          <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm">
+                            {consultation.action}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
 
-                {/* Attorney Stats */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5" />
-                      Performance Metrics
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="text-center p-4 bg-blue-50 rounded-lg">
-                        <Briefcase className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                        <div className="text-2xl font-bold text-blue-600">{selectedAttorney.activeTransactions}</div>
-                        <div className="text-sm text-gray-600">Active Cases</div>
+              {/* Contract Reviews */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div className="p-6 border-b border-gray-200">
+                  <h2 className="text-xl font-semibold">Contract Reviews</h2>
+                </div>
+                
+                <div className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {contractReviews.map((review) => (
+                      <div key={review.id} className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="font-semibold">{review.name}</h3>
+                          <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+                        </div>
+                        <p className="text-sm text-gray-600 mb-3">{review.address}</p>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium">{review.status}</p>
+                            <span className="inline-block px-2 py-1 bg-red-100 text-red-800 text-xs rounded">
+                              {review.stage}
+                            </span>
+                          </div>
+                          <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm">
+                            {review.action}
+                          </button>
+                        </div>
                       </div>
-                      
-                      <div className="text-center p-4 bg-green-50 rounded-lg">
-                        <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                        <div className="text-2xl font-bold text-green-600">{selectedAttorney.completedTransactions}</div>
-                        <div className="text-sm text-gray-600">Completed</div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Legal Tasks */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div className="p-6 border-b border-gray-200">
+                  <h2 className="text-xl font-semibold">Legal Tasks</h2>
+                </div>
+                
+                <div className="p-6">
+                  <div className="space-y-4">
+                    {legalTasks.map((task) => (
+                      <div key={task.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          {task.status === 'completed' ? (
+                            <CheckCircle2 className="w-5 h-5 text-blue-600" />
+                          ) : (
+                            <Clock className="w-5 h-5 text-gray-400" />
+                          )}
+                          <span className="font-medium">{task.task}</span>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <span className="text-sm text-gray-600">{task.date}</span>
+                          <button className="w-8 h-8 border border-gray-300 rounded flex items-center justify-center hover:bg-gray-50">
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                      
-                      <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                        <Star className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
-                        <div className="text-2xl font-bold text-yellow-600">{selectedAttorney.rating}</div>
-                        <div className="text-sm text-gray-600">Rating</div>
-                      </div>
-                      
-                      <div className="text-center p-4 bg-purple-50 rounded-lg">
-                        <Award className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                        <div className="text-2xl font-bold text-purple-600">{selectedAttorney.experience}</div>
-                        <div className="text-sm text-gray-600">Experience</div>
-                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - 1/3 width */}
+            <div className="space-y-6">
+              {/* Calendar */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div className="p-4 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold">{formatMonth(currentDate)}</h3>
+                    <div className="flex items-center space-x-1">
+                      <button 
+                        onClick={() => navigateMonth(-1)}
+                        className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => navigateMonth(1)}
+                        className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
                     </div>
-                  </CardContent>
-                </Card>
-
-                {/* Active Transactions */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Home className="h-5 w-5" />
-                      Active Transactions
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {transactions.filter(t => t.attorney.id === selectedAttorney.id).map((transaction) => {
-                        const progress = calculateTransactionProgress(transaction);
-                        
-                        return (
-                          <Card key={transaction.id} className="hover:shadow-md transition-shadow">
-                            <CardContent className="p-4">
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <h3 className="font-semibold text-gray-900">{transaction.propertyAddress}</h3>
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <Badge className={getStatusColor(transaction.status)}>
-                                      {transaction.status}
-                                    </Badge>
-                                    <span className="text-sm text-gray-500">
-                                      {transaction.clientRole === 'buyer' ? 'Buyer' : 'Seller'}
-                                    </span>
-                                  </div>
-                                  
-                                  <div className="mt-3">
-                                    <div className="flex items-center justify-between mb-1">
-                                      <span className="text-sm font-medium text-gray-700">Progress</span>
-                                      <span className="text-sm text-gray-600">{Math.round(progress)}%</span>
-                                    </div>
-                                    <Progress value={progress} className="h-2" />
-                                  </div>
-                                  
-                                  <div className="grid grid-cols-2 gap-4 mt-3 text-sm">
-                                    <div>
-                                      <span className="text-gray-600">Purchase Price:</span>
-                                      <span className="font-medium ml-1">
-                                        ${transaction.purchasePrice.toLocaleString()}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <span className="text-gray-600">Closing Date:</span>
-                                      <span className="font-medium ml-1">
-                                        {new Date(transaction.timeline.closingDate).toLocaleDateString()}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                                
-                                <div className="flex flex-col gap-2 ml-4">
-                                  <Button size="sm" variant="outline">
-                                    <FileText className="h-4 w-4 mr-1" />
-                                    View
-                                  </Button>
-                                  <Button size="sm" variant="outline">
-                                    <MessageSquare className="h-4 w-4 mr-1" />
-                                    Message
-                                  </Button>
+                  </div>
+                </div>
+                
+                <div className="p-4">
+                  <div className="grid grid-cols-7 gap-1 mb-2">
+                    {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day) => (
+                      <div key={day} className="text-center text-xs font-medium text-gray-500 py-2">
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="grid grid-cols-7 gap-1">
+                    {getDaysInMonth(currentDate).map((day, index) => (
+                      <div key={index} className="aspect-square flex items-center justify-center text-sm">
+                        {day && (
+                          <div className="w-full h-full flex flex-col items-center justify-center relative">
+                            <span className={`${day === 11 || day === 15 ? 'font-semibold' : ''}`}>
+                              {day}
+                            </span>
+                            {calendarEvents.find(event => event.date === day) && (
+                              <div className="absolute bottom-0 left-0 right-0">
+                                <div className="text-xs text-blue-600 truncate px-1">
+                                  {calendarEvents.find(event => event.date === day)?.event}
                                 </div>
                               </div>
-                              
-                              {/* Timeline Steps */}
-                              <div className="mt-4 pt-4 border-t">
-                                <div className="grid grid-cols-4 gap-2">
-                                  {Object.entries(transaction.progress).map(([step, status]) => (
-                                    <div key={step} className="text-center">
-                                      <div className={`w-8 h-8 rounded-full mx-auto mb-1 flex items-center justify-center ${
-                                        status === 'completed' ? 'bg-green-500 text-white' :
-                                        status === 'in-progress' ? 'bg-blue-500 text-white' :
-                                        'bg-gray-200 text-gray-600'
-                                      }`}>
-                                        {status === 'completed' ? (
-                                          <CheckCircle className="h-4 w-4" />
-                                        ) : status === 'in-progress' ? (
-                                          <Clock className="h-4 w-4" />
-                                        ) : (
-                                          <div className="w-2 h-2 bg-current rounded-full" />
-                                        )}
-                                      </div>
-                                      <div className="text-xs text-gray-600 capitalize">{step}</div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
-              </>
-            ) : (
-              <Card className="h-96 flex items-center justify-center">
-                <CardContent className="text-center">
-                  <Scale className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Select an Attorney
-                  </h3>
-                  <p className="text-gray-600">
-                    Choose an attorney from the list to view their profile and workflow
-                  </p>
-                </CardContent>
-              </Card>
-            )}
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Legal Document Templates */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div className="p-4 border-b border-gray-200">
+                  <h3 className="font-semibold">Legal Document Templates</h3>
+                </div>
+                
+                <div className="p-4">
+                  <div className="space-y-3">
+                    {documentTemplates.map((template, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <FileText className="w-4 h-4 text-blue-600" />
+                          <span className="text-sm">{template.name}</span>
+                        </div>
+                        <span className="text-sm text-gray-500">{template.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
-
-export default AttorneyWorkflowPage;
 

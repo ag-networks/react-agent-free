@@ -1,503 +1,461 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { attorneyService } from '../lib/api';
 import {
-  Container,
-  Grid,
-  Card,
-  CardContent,
+  Box,
   Typography,
   Button,
-  Box,
-  Chip,
-  Avatar,
-  LinearProgress,
-  Paper,
-  Divider,
+  Card,
+  CardContent,
+  Grid,
+  Tabs,
+  Tab,
   IconButton,
-  Skeleton,
+  Chip,
+  Paper,
   List,
   ListItem,
-  ListItemAvatar,
+  ListItemIcon,
   ListItemText,
-  ListItemSecondaryAction
+  Divider
 } from '@mui/material';
 import {
-  Gavel as ScaleIcon,
-  Person as UserIcon,
-  Event as CalendarIcon,
+  ArrowBack as ArrowBackIcon,
+  Message as MessageIcon,
+  VideoCall as VideoCallIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
+  Add as AddIcon,
   Schedule as ClockIcon,
   CheckCircle as CheckCircleIcon,
-  Warning as AlertCircleIcon,
   Description as FileTextIcon,
-  Chat as MessageSquareIcon,
-  Phone as PhoneIcon,
-  VideoCall as VideoIcon,
-  Star as StarIcon,
-  EmojiEvents as AwardIcon,
-  Work as BriefcaseIcon,
-  Group as UsersIcon,
-  TrendingUp as TrendingUpIcon,
-  AttachMoney as DollarSignIcon,
-  Home as HomeIcon,
-  ArrowBack as ArrowBackIcon
+  CalendarToday as CalendarIcon
 } from '@mui/icons-material';
-import { attorneyService, transactionService } from '../lib/api';
 
 export function AttorneyWorkflowPage() {
   const navigate = useNavigate();
-  const [attorneys, setAttorneys] = useState([]);
-  const [transactions, setTransactions] = useState([]);
-  const [selectedAttorney, setSelectedAttorney] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [activeTab, setActiveTab] = useState(0);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [attorneyResponse, transactionResponse] = await Promise.all([
-        attorneyService.getAttorneys(),
-        transactionService.getTransactions()
-      ]);
-      
-      setAttorneys(attorneyResponse.attorneys);
-      setTransactions(transactionResponse.transactions);
-      
-      if (attorneyResponse.attorneys.length > 0) {
-        setSelectedAttorney(attorneyResponse.attorneys[0]);
-      }
-    } catch (error) {
-      console.error('Error loading data:', error);
-    } finally {
-      setLoading(false);
+  // Mock data matching the design
+  const pendingConsultations = [
+    {
+      id: 1,
+      name: 'Michelle Lee',
+      address: '3111.7 Frencq, TA Argelle, CA',
+      status: 'Under Contract',
+      stage: 'Pretice',
+      action: 'Approve'
+    },
+    {
+      id: 2,
+      name: 'Robert Chen',
+      address: '201.500 Durf Lateain, TX',
+      status: 'Per approval',
+      stage: 'fintaice',
+      action: 'Review'
     }
-  };
+  ];
 
-  const handleScheduleConsultation = async (attorneyId) => {
-    try {
-      const datetime = new Date();
-      datetime.setDate(datetime.getDate() + 7); // Schedule for next week
-      await attorneyService.scheduleConsultation(attorneyId, datetime.toISOString());
-      alert('Consultation scheduled successfully!');
-    } catch (error) {
-      console.error('Error scheduling consultation:', error);
+  const contractReviews = [
+    {
+      id: 1,
+      name: 'Daniel Martinez',
+      address: '2018.1Htrm JU. Ireican, TI',
+      status: 'Caving',
+      stage: 'Pitgei',
+      action: 'Checkilld'
+    },
+    {
+      id: 2,
+      name: 'Sarah Green',
+      address: '13.8991 5irb Evervea, CO',
+      status: 'Featuig',
+      stage: 'Rotaioia',
+      action: 'Approv'
     }
-  };
+  ];
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Under Contract':
-        return 'info';
-      case 'Closed':
-        return 'success';
-      case 'Pending':
-        return 'warning';
-      default:
-        return 'default';
+  const legalTasks = [
+    {
+      id: 1,
+      task: 'Conduct legal review',
+      date: 'Apr 24',
+      status: 'pending'
+    },
+    {
+      id: 2,
+      task: 'Obtain client approval',
+      date: 'Apr 25',
+      status: 'completed'
     }
+  ];
+
+  const documentTemplates = [
+    { name: 'Contact', status: '--' },
+    { name: 'Amendment', status: '--' },
+    { name: 'Agreement', status: '--' },
+    { name: 'Addendum', status: '--' },
+    { name: 'Bill of Sails', status: '--' }
+  ];
+
+  const calendarEvents = [
+    { date: 11, event: 'Cillets Complrtion' },
+    { date: 15, event: 'Difering Quemion' }
+  ];
+
+  const tabs = ['Dashboards', 'Contitutions', 'Contacts', 'Documents', 'Documents', 'Tasks'];
+
+  const formatMonth = (date) => {
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
 
-  const calculateTransactionProgress = (transaction) => {
-    const steps = ['contract', 'inspection', 'financing', 'closing'];
-    const completedSteps = steps.filter(step => transaction.progress[step] === 'completed').length;
-    return (completedSteps / steps.length) * 100;
-  };
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
 
-  const getStepIcon = (status) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircleIcon color="success" />;
-      case 'in-progress':
-        return <ClockIcon color="info" />;
-      default:
-        return <Box sx={{ width: 8, height: 8, bgcolor: 'grey.400', borderRadius: '50%' }} />;
+    const days = [];
+    
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(null);
     }
+    
+    // Add all days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push(day);
+    }
+    
+    return days;
   };
 
-  if (loading) {
-    return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box sx={{ mb: 4 }}>
-          <Skeleton variant="text" width="40%" height={40} />
-          <Skeleton variant="text" width="60%" height={24} />
-        </Box>
-        <Grid container spacing={3}>
-          <Grid item xs={12} lg={4}>
-            <Skeleton variant="rectangular" height={400} />
-          </Grid>
-          <Grid item xs={12} lg={8}>
-            <Skeleton variant="rectangular" height={400} />
-          </Grid>
-        </Grid>
-      </Container>
-    );
-  }
+  const navigateMonth = (direction) => {
+    setCurrentDate(prev => {
+      const newDate = new Date(prev);
+      newDate.setMonth(prev.getMonth() + direction);
+      return newDate;
+    });
+  };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50' }}>
       {/* Header */}
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <Box>
-          <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
-            Attorney Workflow
-          </Typography>
-          <Typography variant="h6" color="text.secondary">
-            Professional legal support and consultation
-          </Typography>
+      <Paper elevation={1} sx={{ borderRadius: 0 }}>
+        <Box sx={{ px: 3, py: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ 
+                  width: 32, 
+                  height: 32, 
+                  bgcolor: 'primary.main', 
+                  borderRadius: 1, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center' 
+                }}>
+                  <Typography sx={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
+                    ⚖
+                  </Typography>
+                </Box>
+                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                  <Box component="span" sx={{ color: 'primary.main' }}>Agent</Box>
+                  <Box component="span" sx={{ color: 'text.primary' }}>Workflow</Box>
+                </Typography>
+              </Box>
+            </Box>
+            
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Button
+                variant="outlined"
+                startIcon={<MessageIcon />}
+                sx={{ textTransform: 'none' }}
+              >
+                Message
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<VideoCallIcon />}
+                sx={{ textTransform: 'none' }}
+              >
+                Start Video Call
+              </Button>
+            </Box>
+          </Box>
         </Box>
-        <Button 
-          variant="outlined" 
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/dashboard')}
-        >
-          Back to Dashboard
-        </Button>
-      </Box>
+      </Paper>
 
-      <Grid container spacing={3}>
-        {/* Attorney List */}
-        <Grid item xs={12} lg={4}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-                <ScaleIcon />
-                <Typography variant="h6">Available Attorneys</Typography>
-              </Box>
-              
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {attorneys.map((attorney) => (
-                  <Card 
-                    key={attorney.id}
-                    sx={{ 
-                      cursor: 'pointer',
-                      border: selectedAttorney?.id === attorney.id ? 2 : 1,
-                      borderColor: selectedAttorney?.id === attorney.id ? 'primary.main' : 'divider',
-                      bgcolor: selectedAttorney?.id === attorney.id ? 'primary.50' : 'background.paper',
-                      '&:hover': {
-                        bgcolor: selectedAttorney?.id === attorney.id ? 'primary.50' : 'grey.50',
-                        boxShadow: 2
-                      }
-                    }}
-                    onClick={() => setSelectedAttorney(attorney)}
-                  >
-                    <CardContent>
-                      <Box sx={{ display: 'flex', gap: 2 }}>
-                        <Avatar sx={{ width: 48, height: 48 }} src={attorney.avatar}>
-                          {attorney.name.split(' ').map(n => n[0]).join('')}
-                        </Avatar>
-                        
-                        <Box sx={{ flex: 1 }}>
-                          <Typography variant="h6" gutterBottom>
-                            {attorney.name}
-                          </Typography>
-                          
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                            <StarIcon sx={{ color: 'warning.main', fontSize: 16 }} />
-                            <Typography variant="body2" fontWeight="medium">
-                              {attorney.rating}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              • {attorney.experience}
-                            </Typography>
-                          </Box>
-                          
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2 }}>
-                            {attorney.specialties.slice(0, 2).map((specialty, index) => (
-                              <Chip 
-                                key={index} 
-                                label={specialty} 
-                                size="small" 
-                                color="secondary"
-                              />
-                            ))}
-                          </Box>
-                          
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
-                            <Typography variant="body2" color="text.secondary">
-                              <strong>{attorney.activeTransactions}</strong> active
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              <strong>{attorney.completedTransactions}</strong> completed
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                ))}
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
+      {/* Navigation Tabs */}
+      <Paper elevation={1} sx={{ borderRadius: 0 }}>
+        <Box sx={{ px: 3 }}>
+          <Tabs 
+            value={activeTab} 
+            onChange={(e, newValue) => setActiveTab(newValue)}
+            sx={{ borderBottom: 1, borderColor: 'divider' }}
+          >
+            {tabs.map((tab, index) => (
+              <Tab 
+                key={tab} 
+                label={tab} 
+                sx={{ textTransform: 'none', fontWeight: 500 }}
+              />
+            ))}
+          </Tabs>
+        </Box>
+      </Paper>
 
-        {/* Attorney Details & Workflow */}
-        <Grid item xs={12} lg={8}>
-          {selectedAttorney ? (
+      <Box sx={{ p: 3 }}>
+        <Grid container spacing={3}>
+          {/* Left Column - 2/3 width */}
+          <Grid size={{ xs: 12, lg: 8 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              {/* Attorney Profile */}
-              <Card>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-                    <UserIcon />
-                    <Typography variant="h6">Attorney Profile</Typography>
-                  </Box>
-                  
-                  <Box sx={{ display: 'flex', gap: 3 }}>
-                    <Avatar sx={{ width: 80, height: 80 }} src={selectedAttorney.avatar}>
-                      {selectedAttorney.name.split(' ').map(n => n[0]).join('')}
-                    </Avatar>
-                    
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="h4" gutterBottom fontWeight="bold">
-                        {selectedAttorney.name}
-                      </Typography>
-                      
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <StarIcon sx={{ color: 'warning.main', fontSize: 16 }} />
-                          <Typography variant="body1" fontWeight="medium">
-                            {selectedAttorney.rating}
-                          </Typography>
-                        </Box>
-                        <Typography variant="body1" color="text.secondary">
-                          • {selectedAttorney.experience} experience
-                        </Typography>
-                      </Box>
-                      
-                      <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-                        {selectedAttorney.bio}
-                      </Typography>
-                      
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>
-                        {selectedAttorney.specialties.map((specialty, index) => (
-                          <Chip 
-                            key={index} 
-                            label={specialty} 
-                            variant="outlined"
-                          />
-                        ))}
-                      </Box>
-                      
-                      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                        <Button 
-                          variant="contained"
-                          startIcon={<CalendarIcon />}
-                          onClick={() => handleScheduleConsultation(selectedAttorney.id)}
-                        >
-                          Schedule Consultation
-                        </Button>
-                        <Button 
-                          variant="outlined" 
-                          startIcon={<MessageSquareIcon />}
-                        >
-                          Send Message
-                        </Button>
-                        <Button 
-                          variant="outlined" 
-                          startIcon={<PhoneIcon />}
-                        >
-                          Call
-                        </Button>
-                      </Box>
+              {/* Pending Client Consultations */}
+              <Card elevation={1}>
+                <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                      Pending Client Consultations
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        sx={{ textTransform: 'none' }}
+                      >
+                        Deteutinge
+                      </Button>
+                      <IconButton size="small" sx={{ border: 1, borderColor: 'grey.300' }}>
+                        <AddIcon />
+                      </IconButton>
                     </Box>
                   </Box>
-                </CardContent>
-              </Card>
-
-              {/* Attorney Stats */}
-              <Card>
+                </Box>
+                
                 <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-                    <TrendingUpIcon />
-                    <Typography variant="h6">Performance Metrics</Typography>
-                  </Box>
-                  
                   <Grid container spacing={2}>
-                    <Grid item xs={6} md={3}>
-                      <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'primary.50' }}>
-                        <BriefcaseIcon sx={{ fontSize: 32, color: 'primary.main', mb: 1 }} />
-                        <Typography variant="h4" fontWeight="bold" color="primary.main">
-                          {selectedAttorney.activeTransactions}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Active Cases
-                        </Typography>
-                      </Paper>
-                    </Grid>
-                    
-                    <Grid item xs={6} md={3}>
-                      <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'success.50' }}>
-                        <CheckCircleIcon sx={{ fontSize: 32, color: 'success.main', mb: 1 }} />
-                        <Typography variant="h4" fontWeight="bold" color="success.main">
-                          {selectedAttorney.completedTransactions}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Completed
-                        </Typography>
-                      </Paper>
-                    </Grid>
-                    
-                    <Grid item xs={6} md={3}>
-                      <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'warning.50' }}>
-                        <StarIcon sx={{ fontSize: 32, color: 'warning.main', mb: 1 }} />
-                        <Typography variant="h4" fontWeight="bold" color="warning.main">
-                          {selectedAttorney.rating}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Rating
-                        </Typography>
-                      </Paper>
-                    </Grid>
-                    
-                    <Grid item xs={6} md={3}>
-                      <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'secondary.50' }}>
-                        <AwardIcon sx={{ fontSize: 32, color: 'secondary.main', mb: 1 }} />
-                        <Typography variant="h4" fontWeight="bold" color="secondary.main">
-                          {selectedAttorney.experience}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Experience
-                        </Typography>
-                      </Paper>
-                    </Grid>
+                    {pendingConsultations.map((consultation) => (
+                      <Grid size={{ xs: 12, md: 6 }} key={consultation.id}>
+                        <Paper variant="outlined" sx={{ p: 2 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                              {consultation.name}
+                            </Typography>
+                            <ChevronRightIcon sx={{ color: 'grey.400' }} />
+                          </Box>
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                            {consultation.address}
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Box>
+                              <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>
+                                {consultation.status}
+                              </Typography>
+                              <Chip 
+                                label={consultation.stage} 
+                                size="small" 
+                                sx={{ bgcolor: 'warning.light', color: 'warning.dark' }}
+                              />
+                            </Box>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              sx={{ textTransform: 'none' }}
+                            >
+                              {consultation.action}
+                            </Button>
+                          </Box>
+                        </Paper>
+                      </Grid>
+                    ))}
                   </Grid>
                 </CardContent>
               </Card>
 
-              {/* Active Transactions */}
-              <Card>
+              {/* Contract Reviews */}
+              <Card elevation={1}>
+                <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Contract Reviews
+                  </Typography>
+                </Box>
+                
                 <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-                    <HomeIcon />
-                    <Typography variant="h6">Active Transactions</Typography>
-                  </Box>
-                  
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {transactions.filter(t => t.attorney.id === selectedAttorney.id).map((transaction) => {
-                      const progress = calculateTransactionProgress(transaction);
-                      
-                      return (
-                        <Card key={transaction.id} sx={{ '&:hover': { boxShadow: 3 } }}>
-                          <CardContent>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                              <Box sx={{ flex: 1 }}>
-                                <Typography variant="h6" gutterBottom>
-                                  {transaction.propertyAddress}
-                                </Typography>
-                                
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                                  <Chip 
-                                    label={transaction.status} 
-                                    color={getStatusColor(transaction.status)}
-                                    size="small"
-                                  />
-                                  <Typography variant="body2" color="text.secondary">
-                                    {transaction.clientRole === 'buyer' ? 'Buyer' : 'Seller'}
-                                  </Typography>
-                                </Box>
-                                
-                                <Box sx={{ mb: 2 }}>
-                                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                    <Typography variant="body2" fontWeight="medium">
-                                      Progress
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                      {Math.round(progress)}%
-                                    </Typography>
-                                  </Box>
-                                  <LinearProgress 
-                                    variant="determinate" 
-                                    value={progress} 
-                                    sx={{ height: 8, borderRadius: 4 }}
-                                  />
-                                </Box>
-                                
-                                <Grid container spacing={2} sx={{ mb: 2 }}>
-                                  <Grid item xs={6}>
-                                    <Typography variant="body2" color="text.secondary">
-                                      Purchase Price:
-                                    </Typography>
-                                    <Typography variant="body2" fontWeight="medium">
-                                      ${transaction.purchasePrice.toLocaleString()}
-                                    </Typography>
-                                  </Grid>
-                                  <Grid item xs={6}>
-                                    <Typography variant="body2" color="text.secondary">
-                                      Closing Date:
-                                    </Typography>
-                                    <Typography variant="body2" fontWeight="medium">
-                                      {new Date(transaction.timeline.closingDate).toLocaleDateString()}
-                                    </Typography>
-                                  </Grid>
-                                </Grid>
-                              </Box>
-                              
-                              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml: 2 }}>
-                                <Button 
-                                  size="small" 
-                                  variant="outlined" 
-                                  startIcon={<FileTextIcon />}
-                                >
-                                  View
-                                </Button>
-                                <Button 
-                                  size="small" 
-                                  variant="outlined" 
-                                  startIcon={<MessageSquareIcon />}
-                                >
-                                  Message
-                                </Button>
-                              </Box>
+                  <Grid container spacing={2}>
+                    {contractReviews.map((review) => (
+                      <Grid size={{ xs: 12, md: 6 }} key={review.id}>
+                        <Paper variant="outlined" sx={{ p: 2 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                              {review.name}
+                            </Typography>
+                            <ChevronRightIcon sx={{ color: 'grey.400' }} />
+                          </Box>
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                            {review.address}
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Box>
+                              <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>
+                                {review.status}
+                              </Typography>
+                              <Chip 
+                                label={review.stage} 
+                                size="small" 
+                                sx={{ bgcolor: 'error.light', color: 'error.dark' }}
+                              />
                             </Box>
-                            
-                            {/* Timeline Steps */}
-                            <Divider sx={{ my: 2 }} />
-                            <Grid container spacing={1}>
-                              {Object.entries(transaction.progress).map(([step, status]) => (
-                                <Grid item xs={3} key={step}>
-                                  <Box sx={{ textAlign: 'center' }}>
-                                    <Box sx={{ 
-                                      display: 'flex', 
-                                      justifyContent: 'center', 
-                                      mb: 1 
-                                    }}>
-                                      {getStepIcon(status)}
-                                    </Box>
-                                    <Typography variant="caption" color="text.secondary">
-                                      {step.charAt(0).toUpperCase() + step.slice(1)}
-                                    </Typography>
-                                  </Box>
-                                </Grid>
-                              ))}
-                            </Grid>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              sx={{ textTransform: 'none' }}
+                            >
+                              {review.action}
+                            </Button>
+                          </Box>
+                        </Paper>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </CardContent>
+              </Card>
+
+              {/* Legal Tasks */}
+              <Card elevation={1}>
+                <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Legal Tasks
+                  </Typography>
+                </Box>
+                
+                <CardContent>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    {legalTasks.map((task) => (
+                      <Paper key={task.id} variant="outlined" sx={{ p: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            {task.status === 'completed' ? (
+                              <CheckCircleIcon sx={{ color: 'primary.main' }} />
+                            ) : (
+                              <ClockIcon sx={{ color: 'grey.400' }} />
+                            )}
+                            <Typography sx={{ fontWeight: 500 }}>{task.task}</Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Typography variant="body2" color="text.secondary">
+                              {task.date}
+                            </Typography>
+                            <IconButton size="small" sx={{ border: 1, borderColor: 'grey.300' }}>
+                              <AddIcon />
+                            </IconButton>
+                          </Box>
+                        </Box>
+                      </Paper>
+                    ))}
                   </Box>
                 </CardContent>
               </Card>
             </Box>
-          ) : (
-            <Card sx={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CardContent sx={{ textAlign: 'center' }}>
-                <ScaleIcon sx={{ fontSize: 64, color: 'grey.300', mb: 2 }} />
-                <Typography variant="h6" gutterBottom>
-                  Select an Attorney
-                </Typography>
-                <Typography color="text.secondary">
-                  Choose an attorney from the list to view their profile and workflow
-                </Typography>
-              </CardContent>
-            </Card>
-          )}
+          </Grid>
+
+          {/* Right Column - 1/3 width */}
+          <Grid size={{ xs: 12, lg: 4 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              {/* Calendar */}
+              <Card elevation={1}>
+                <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      {formatMonth(currentDate)}
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <IconButton 
+                        size="small"
+                        onClick={() => navigateMonth(-1)}
+                      >
+                        <ChevronLeftIcon />
+                      </IconButton>
+                      <IconButton 
+                        size="small"
+                        onClick={() => navigateMonth(1)}
+                      >
+                        <ChevronRightIcon />
+                      </IconButton>
+                    </Box>
+                  </Box>
+                </Box>
+                
+                <CardContent sx={{ p: 2 }}>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0.5, mb: 1 }}>
+                    {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day) => (
+                      <Box key={day} sx={{ textAlign: 'center', py: 1 }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                          {day}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                  
+                  <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0.5 }}>
+                    {getDaysInMonth(currentDate).map((day, index) => (
+                      <Box key={index} sx={{ aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {day && (
+                          <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                            <Typography variant="body2" sx={{ fontWeight: day === 11 || day === 15 ? 600 : 400 }}>
+                              {day}
+                            </Typography>
+                            {calendarEvents.find(event => event.date === day) && (
+                              <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
+                                <Typography variant="caption" sx={{ color: 'primary.main', fontSize: '10px' }}>
+                                  {calendarEvents.find(event => event.date === day)?.event}
+                                </Typography>
+                              </Box>
+                            )}
+                          </Box>
+                        )}
+                      </Box>
+                    ))}
+                  </Box>
+                </CardContent>
+              </Card>
+
+              {/* Legal Document Templates */}
+              <Card elevation={1}>
+                <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                    Legal Document Templates
+                  </Typography>
+                </Box>
+                
+                <CardContent sx={{ p: 2 }}>
+                  <List dense>
+                    {documentTemplates.map((template, index) => (
+                      <ListItem key={index} sx={{ px: 0 }}>
+                        <ListItemIcon sx={{ minWidth: 32 }}>
+                          <FileTextIcon sx={{ color: 'primary.main', fontSize: 20 }} />
+                        </ListItemIcon>
+                        <ListItemText 
+                          primary={template.name}
+                          primaryTypographyProps={{ variant: 'body2' }}
+                        />
+                        <Typography variant="body2" color="text.secondary">
+                          {template.status}
+                        </Typography>
+                      </ListItem>
+                    ))}
+                  </List>
+                </CardContent>
+              </Card>
+            </Box>
+          </Grid>
         </Grid>
-      </Grid>
-    </Container>
+      </Box>
+    </Box>
   );
 }
-
-export default AttorneyWorkflowPage;
 
