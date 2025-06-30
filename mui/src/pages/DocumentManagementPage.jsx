@@ -439,13 +439,19 @@ export function DocumentManagementPage() {
                                   {doc.size}
                                 </Typography>
                               </Box>
-                              {doc.signatures && (
+                              {doc.signatures && doc.signatures.length > 0 && (
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
                                   <Typography variant="body2" color="text.secondary">
                                     Signatures:
                                   </Typography>
                                   {doc.signatures.map((sig, index) => (
-                                    <Chip key={index} label={sig} variant="outlined" size="small" />
+                                    <Chip 
+                                      key={index} 
+                                      label={typeof sig === 'string' ? sig : `${sig.party}${sig.signed ? ' ✓' : ''}`} 
+                                      variant="outlined" 
+                                      size="small" 
+                                      color={typeof sig === 'object' && sig.signed ? 'success' : 'default'}
+                                    />
                                   ))}
                                 </Box>
                               )}
