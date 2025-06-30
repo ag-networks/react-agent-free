@@ -41,9 +41,7 @@ import {
   Search as SearchIcon,
   Gavel as GavelIcon,
   Add as AddIcon,
-  Warning as WarningIcon,
-  Upload as UploadIcon,
-  Phone as PhoneIcon
+  Warning as WarningIcon
 } from '@mui/icons-material';
 
 const drawerWidth = 240;
@@ -53,88 +51,83 @@ export function DashboardPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Transaction Overview Data matching the design
-  const transactionOverview = [
-    {
-      title: 'Contract Review',
-      amount: '$550,000',
-      status: 'active'
-    },
-    {
-      title: 'Inspection Period',
-      amount: '$325,000',
-      status: 'active'
-    },
-    {
-      title: 'Financing',
-      amount: '$45,000',
-      progress: 75,
-      status: 'in-progress'
-    },
-    {
-      title: 'Closing Preparation',
-      amount: '$550,000',
-      status: 'pending'
-    }
-  ];
-
-  // Transaction Timeline matching the design
-  const transactionTimeline = [
-    {
-      event: 'Contract Accepted',
-      date: 'May 2, 2024',
-      status: 'completed'
-    },
-    {
-      event: 'Inspection Ends',
-      date: 'May 9, 2024',
-      status: 'completed'
-    },
-    {
-      event: 'Financing',
-      date: '40% complete',
-      status: 'in-progress'
-    },
-    {
-      event: 'Apprebal',
-      date: 'May 15, 2024',
-      status: 'pending'
-    },
-    {
-      event: 'Closing Date',
-      date: 'May 30, 2024',
-      status: 'pending'
-    }
-  ];
-
-  // Recent Activity matching the design
-  const recentActivity = [
+  const transactions = [
     {
       id: 1,
-      name: 'Alice Jennings',
-      action: 'Anrriee keurrecompleted',
-      avatar: 'A+'
+      property: '123 Oak Street, San Francisco, CA',
+      status: 'contract_review',
+      progress: 25,
+      nextStep: 'Attorney review pending',
+      price: '$750,000',
+      type: 'purchase'
     },
     {
       id: 2,
-      name: 'Purchase agreement',
-      action: 'Tegract',
-      avatar: 'A+'
+      property: '456 Pine Avenue, Oakland, CA',
+      status: 'inspection',
+      progress: 60,
+      nextStep: 'Inspection scheduled for tomorrow',
+      price: '$520,000',
+      type: 'sale'
     }
   ];
 
+  const recentActivity = [
+    {
+      id: 1,
+      type: 'document',
+      message: 'Contract uploaded for 123 Oak Street',
+      time: '2 hours ago',
+      icon: DescriptionIcon
+    },
+    {
+      id: 2,
+      type: 'attorney',
+      message: 'Attorney Sarah Johnson assigned to your case',
+      time: '1 day ago',
+      icon: PersonIcon
+    },
+    {
+      id: 3,
+      type: 'message',
+      message: 'New message from your attorney',
+      time: '2 days ago',
+      icon: MessageIcon
+    }
+  ];
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'contract_review': return 'warning';
+      case 'inspection': return 'info';
+      case 'financing': return 'secondary';
+      case 'closing': return 'success';
+      default: return 'default';
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'contract_review': return 'Contract Review';
+      case 'inspection': return 'Inspection Period';
+      case 'financing': return 'Financing';
+      case 'closing': return 'Closing Preparation';
+      default: return 'Unknown';
+    }
+  };
+
   const menuItems = [
-    { text: 'Dashboard', icon: DashboardIcon, path: '/dashboard', active: true },
-    { text: 'My Transactions', icon: DescriptionIcon, path: '/properties' },
+    { text: 'Dashboard', icon: DashboardIcon, path: '/dashboard' },
+    { text: 'Property Search', icon: SearchIcon, path: '/properties' },
+    { text: 'Contracts', icon: DescriptionIcon, path: '/contracts' },
     { text: 'Documents', icon: DescriptionIcon, path: '/documents' },
     { text: 'Messages', icon: MessageIcon, path: '/messages' },
-    { text: 'Calendar', icon: CalendarIcon, path: '/calendar' },
-    { text: 'Settings', icon: SettingsIcon, path: '/settings' }
+    { text: 'Attorneys', icon: GavelIcon, path: '/attorneys' },
   ];
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Blue Sidebar */}
+    <Box sx={{ display: 'flex' }}>
+      {/* Sidebar */}
       <Drawer
         variant="permanent"
         sx={{
@@ -143,53 +136,53 @@ export function DashboardPage() {
           '& .MuiDrawer-paper': {
             width: drawerWidth,
             boxSizing: 'border-box',
-            bgcolor: 'primary.main',
-            color: 'white'
           },
         }}
       >
-        {/* Logo */}
-        <Box sx={{ p: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'white' }}>
+        <Toolbar>
+          <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
+            <HomeIcon />
+          </Avatar>
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
             Agent Free
           </Typography>
-        </Box>
-
-        {/* Navigation */}
-        <List sx={{ flexGrow: 1, px: 2 }}>
-          {menuItems.map((item) => (
-            <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
-              <ListItemButton
-                onClick={() => navigate(item.path)}
-                sx={{
-                  borderRadius: 2,
-                  color: 'white',
-                  bgcolor: item.active ? 'primary.dark' : 'transparent',
-                  '&:hover': {
-                    bgcolor: 'primary.dark'
-                  }
-                }}
-              >
-                <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
-                  <item.icon />
-                </ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItemButton>
-            </ListItem>
-          ))}
+        </Toolbar>
+        
+        <Divider />
+        
+        <List sx={{ flexGrow: 1 }}>
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isSelected = location.pathname === item.path;
+            return (
+              <ListItem key={item.text} disablePadding>
+                <ListItemButton
+                  selected={isSelected}
+                  onClick={() => navigate(item.path)}
+                >
+                  <ListItemIcon>
+                    <Icon color={isSelected ? 'primary' : 'inherit'} />
+                  </ListItemIcon>
+                  <ListItemText primary={item.text} />
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
         </List>
 
+        <Divider />
+        
         {/* User Profile */}
-        <Box sx={{ p: 2, borderTop: 1, borderColor: 'primary.dark' }}>
+        <Box sx={{ p: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Avatar sx={{ bgcolor: 'primary.dark', mr: 2 }}>
+            <Avatar sx={{ mr: 2 }}>
               {user?.firstName?.[0]}{user?.lastName?.[0]}
             </Avatar>
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="body2" sx={{ fontWeight: 500, color: 'white' }}>
+            <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+              <Typography variant="subtitle2" noWrap>
                 {user?.firstName} {user?.lastName}
               </Typography>
-              <Typography variant="caption" sx={{ color: 'primary.light' }}>
+              <Typography variant="caption" color="text.secondary" noWrap>
                 {user?.email}
               </Typography>
             </Box>
@@ -198,15 +191,8 @@ export function DashboardPage() {
             fullWidth
             variant="outlined"
             size="small"
+            startIcon={<ExitIcon />}
             onClick={logout}
-            sx={{ 
-              color: 'white', 
-              borderColor: 'white',
-              '&:hover': {
-                bgcolor: 'primary.dark',
-                borderColor: 'white'
-              }
-            }}
           >
             Sign Out
           </Button>
@@ -214,158 +200,256 @@ export function DashboardPage() {
       </Drawer>
 
       {/* Main Content */}
-      <Box component="main" sx={{ flexGrow: 1, bgcolor: 'grey.50' }}>
-        <Container maxWidth="xl" sx={{ py: 4 }}>
-          {/* Header */}
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h3" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
-              Transaction Overview
-            </Typography>
-          </Box>
+      <Box component="main" sx={{ flexGrow: 1 }}>
+        {/* Header */}
+        <AppBar position="static" elevation={1}>
+          <Toolbar>
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography variant="h4" sx={{ fontWeight: 600 }}>
+                Dashboard
+              </Typography>
+              <Typography variant="subtitle1" color="text.secondary">
+                Welcome back, {user?.firstName}!
+              </Typography>
+            </Box>
+            <IconButton color="inherit" sx={{ mr: 1 }}>
+              <Badge badgeContent={3} color="error">
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              sx={{ ml: 1 }}
+            >
+              New Transaction
+            </Button>
+          </Toolbar>
+        </AppBar>
 
-          {/* Transaction Overview Cards */}
+        <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+          {/* Stats Cards */}
           <Grid container spacing={3} sx={{ mb: 4 }}>
-            {transactionOverview.map((transaction, index) => (
-              <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={index}>
-                <Card elevation={1}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                      {transaction.title}
-                    </Typography>
-                    <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>
-                      {transaction.amount}
-                    </Typography>
-                    {transaction.progress && (
-                      <Box>
-                        <LinearProgress 
-                          variant="determinate" 
-                          value={transaction.progress} 
-                          sx={{ height: 8, borderRadius: 4, mb: 1 }}
-                        />
-                        <Typography variant="body2" color="text.secondary">
-                          {transaction.progress}%
-                        </Typography>
-                      </Box>
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Card elevation={2}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box>
+                      <Typography color="text.secondary" gutterBottom variant="overline">
+                        Active Transactions
+                      </Typography>
+                      <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                        2
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        +1 from last month
+                      </Typography>
+                    </Box>
+                    <Avatar sx={{ bgcolor: 'primary.light' }}>
+                      <DescriptionIcon />
+                    </Avatar>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Card elevation={2}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box>
+                      <Typography color="text.secondary" gutterBottom variant="overline">
+                        Total Saved
+                      </Typography>
+                      <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                        $31,000
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        vs traditional agents
+                      </Typography>
+                    </Box>
+                    <Avatar sx={{ bgcolor: 'success.light' }}>
+                      <MoneyIcon />
+                    </Avatar>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Card elevation={2}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box>
+                      <Typography color="text.secondary" gutterBottom variant="overline">
+                        Avg. Process Time
+                      </Typography>
+                      <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                        28 days
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        15% faster than average
+                      </Typography>
+                    </Box>
+                    <Avatar sx={{ bgcolor: 'info.light' }}>
+                      <ClockIcon />
+                    </Avatar>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Card elevation={2}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box>
+                      <Typography color="text.secondary" gutterBottom variant="overline">
+                        Success Rate
+                      </Typography>
+                      <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                        98%
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Successful closings
+                      </Typography>
+                    </Box>
+                    <Avatar sx={{ bgcolor: 'success.light' }}>
+                      <CheckIcon />
+                    </Avatar>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
           </Grid>
 
           <Grid container spacing={4}>
-            {/* Transaction Timeline */}
-            <Grid size={{ xs: 12, lg: 6 }}>
-              <Card elevation={1}>
-                <CardContent sx={{ p: 3 }}>
-                  <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
-                    Transaction Timeline
+            {/* Active Transactions */}
+            <Grid size={{ xs: 12, lg: 8 }}>
+              <Card elevation={2}>
+                <CardContent>
+                  <Typography variant="h5" sx={{ mb: 1, fontWeight: 600 }}>
+                    Active Transactions
                   </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                    {transactionTimeline.map((item, index) => (
-                      <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Box
-                          sx={{
-                            width: 12,
-                            height: 12,
-                            borderRadius: '50%',
-                            bgcolor: item.status === 'completed' ? 'primary.main' :
-                                    item.status === 'in-progress' ? 'primary.light' :
-                                    'grey.300'
-                          }}
-                        />
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexGrow: 1 }}>
-                          <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                            {item.event}
-                          </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                    Your current real estate transactions and their progress
+                  </Typography>
+
+                  <Box sx={{ space: 3 }}>
+                    {transactions.map((transaction) => (
+                      <Paper
+                        key={transaction.id}
+                        elevation={1}
+                        sx={{ p: 3, mb: 2, borderRadius: 2 }}
+                      >
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                          <Box>
+                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                              {transaction.property}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {transaction.type === 'purchase' ? 'Purchasing' : 'Selling'} • {transaction.price}
+                            </Typography>
+                          </Box>
+                          <Chip
+                            label={getStatusText(transaction.status)}
+                            color={getStatusColor(transaction.status)}
+                            size="small"
+                          />
+                        </Box>
+
+                        <Box sx={{ mb: 2 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                            <Typography variant="body2">Progress</Typography>
+                            <Typography variant="body2">{transaction.progress}%</Typography>
+                          </Box>
+                          <LinearProgress
+                            variant="determinate"
+                            value={transaction.progress}
+                            sx={{ height: 8, borderRadius: 4 }}
+                          />
+                        </Box>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <WarningIcon color="warning" sx={{ mr: 1, fontSize: 20 }} />
                           <Typography variant="body2" color="text.secondary">
-                            {item.date}
+                            {transaction.nextStep}
                           </Typography>
                         </Box>
-                      </Box>
+                      </Paper>
                     ))}
                   </Box>
                 </CardContent>
               </Card>
             </Grid>
 
-            {/* Right Column */}
-            <Grid size={{ xs: 12, lg: 6 }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                {/* Recent Activity */}
-                <Card elevation={1}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
-                      Recent Activity
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                      {recentActivity.map((activity) => (
-                        <Box key={activity.id} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                          <Box
-                            sx={{
-                              width: 40,
-                              height: 40,
-                              bgcolor: 'primary.main',
-                              borderRadius: '50%',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              color: 'white',
-                              fontWeight: 'bold',
-                              fontSize: '14px'
-                            }}
-                          >
-                            {activity.avatar}
-                          </Box>
-                          <Box sx={{ flexGrow: 1 }}>
-                            <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                              {activity.name}
+            {/* Recent Activity & Quick Actions */}
+            <Grid size={{ xs: 12, lg: 4 }}>
+              <Card elevation={2} sx={{ mb: 3 }}>
+                <CardContent>
+                  <Typography variant="h5" sx={{ mb: 1, fontWeight: 600 }}>
+                    Recent Activity
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                    Latest updates on your transactions
+                  </Typography>
+
+                  <Box>
+                    {recentActivity.map((activity) => {
+                      const Icon = activity.icon;
+                      return (
+                        <Box key={activity.id} sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
+                          <Avatar sx={{ bgcolor: 'grey.100', mr: 2, width: 32, height: 32 }}>
+                            <Icon sx={{ fontSize: 16 }} />
+                          </Avatar>
+                          <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                            <Typography variant="body2" sx={{ mb: 0.5 }}>
+                              {activity.message}
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {activity.action}
+                            <Typography variant="caption" color="text.secondary">
+                              {activity.time}
                             </Typography>
                           </Box>
                         </Box>
-                      ))}
-                    </Box>
-                  </CardContent>
-                </Card>
+                      );
+                    })}
+                  </Box>
+                </CardContent>
+              </Card>
 
-                {/* Quick Actions */}
-                <Card elevation={1}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
-                      Quick Actions
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                      <Box sx={{ display: 'flex', gap: 2 }}>
-                        <Button
-                          variant="contained"
-                          startIcon={<UploadIcon />}
-                          sx={{ flex: 1, textTransform: 'none' }}
-                        >
-                          Upload Deviow
-                        </Button>
-                        <Button
-                          variant="contained"
-                          startIcon={<PhoneIcon />}
-                          sx={{ flex: 1, textTransform: 'none' }}
-                        >
-                          Schedule Call
-                        </Button>
-                      </Box>
-                      <Button
-                        variant="contained"
-                        startIcon={<MessageIcon />}
-                        fullWidth
-                        sx={{ textTransform: 'none' }}
-                      >
-                        Direct Campage
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Box>
+              <Card elevation={2}>
+                <CardContent>
+                  <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
+                    Quick Actions
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Button
+                      variant="outlined"
+                      startIcon={<AddIcon />}
+                      fullWidth
+                      sx={{ justifyContent: 'flex-start' }}
+                    >
+                      Upload Document
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      startIcon={<CalendarIcon />}
+                      fullWidth
+                      sx={{ justifyContent: 'flex-start' }}
+                    >
+                      Schedule Call
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      startIcon={<MessageIcon />}
+                      fullWidth
+                      sx={{ justifyContent: 'flex-start' }}
+                    >
+                      Send Message
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
             </Grid>
           </Grid>
         </Container>
@@ -373,4 +457,3 @@ export function DashboardPage() {
     </Box>
   );
 }
-
